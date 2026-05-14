@@ -57,6 +57,7 @@ import com.shub39.grit.core.habits.presentation.daysStartingFrom
 import com.shub39.grit.core.shared_ui.endItemShape
 import com.shub39.grit.core.shared_ui.leadingItemShape
 import com.shub39.grit.core.utils.GritPreviewWrapper
+import com.shub39.grit.core.utils.localized
 import com.shub39.grit.core.utils.now
 import grit.shared.core.generated.resources.Res
 import grit.shared.core.generated.resources.view_week
@@ -121,7 +122,7 @@ fun WeeklyBooleanHeatMap(
                                 )
                     ) {
                         Text(
-                            text = dayOfWeek.name.take(1),
+                            text = stringResource(dayOfWeek.localized()).take(1).uppercase(),
                             style =
                                 MaterialTheme.typography.labelSmall.copy(
                                     color = MaterialTheme.colorScheme.onSurface

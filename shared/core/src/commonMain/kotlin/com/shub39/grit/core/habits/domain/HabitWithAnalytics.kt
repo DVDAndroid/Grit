@@ -18,10 +18,11 @@ package com.shub39.grit.core.habits.domain
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import kotlinx.datetime.DayOfWeek
 
 typealias WeeklyComparisonData = List<Double>
 
-typealias WeekDayFrequencyData = Map<String, Int>
+typealias WeekDayFrequencyData = Map<DayOfWeek, Int>
 
 /** Grouped model for [habit] and its constituent analytics calculated from [statuses] */
 @Stable

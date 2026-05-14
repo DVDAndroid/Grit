@@ -59,6 +59,7 @@ import com.kizitonwose.calendar.core.minusDays
 import com.kizitonwose.calendar.core.plusDays
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.presentation.HabitsAction
+import com.shub39.grit.core.utils.localized
 import com.shub39.grit.core.utils.now
 import com.shub39.grit.core.utils.toFormattedString
 import grit.shared.core.generated.resources.Res
@@ -71,6 +72,7 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 /** Habit Card for list */
@@ -328,7 +330,7 @@ fun HabitCard(
                             )
 
                             Text(
-                                text = weekDay.date.dayOfWeek.toString().take(3),
+                                text = stringResource(weekDay.date.dayOfWeek.localized()).uppercase().take(3),
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1,
                                 modifier = Modifier.basicMarquee(),

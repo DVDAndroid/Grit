@@ -16,10 +16,12 @@
  */
 package com.shub39.grit.habits.data.repository
 
+import androidx.compose.runtime.Composable
 import com.shub39.grit.core.habits.domain.HabitCompleted
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.domain.WeekDayFrequencyData
 import com.shub39.grit.core.habits.domain.WeeklyComparisonData
+import com.shub39.grit.core.utils.localized
 import com.shub39.grit.core.utils.now
 import kotlin.time.ExperimentalTime
 import kotlinx.datetime.DatePeriod
@@ -31,6 +33,7 @@ import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalTime::class)
 fun countCurrentStreak(
@@ -143,11 +146,7 @@ fun prepareLineChartData(
 fun prepareWeekDayFrequencyData(dates: List<LocalDate>): WeekDayFrequencyData {
     val dayFrequency = dates.groupingBy { it.dayOfWeek }.eachCount()
 
-    return DayOfWeek.entries.associate { dayOfWeek ->
-        val weekName = DayOfWeekNames.ENGLISH_ABBREVIATED.names[dayOfWeek.isoDayNumber - 1]
-
-        weekName to (dayFrequency[dayOfWeek] ?: 0)
-    }
+    return DayOfWeek.entries.associateWith { dayOfWeek -> (dayFrequency[dayOfWeek] ?: 0) }
 }
 
 fun prepareHeatMapData(habitData: List<HabitStatus>): Map<LocalDate, Int> {

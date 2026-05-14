@@ -40,12 +40,13 @@ import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
 import com.shub39.grit.core.habits.domain.WeekDayFrequencyData
 import com.shub39.grit.core.utils.GritPreviewWrapper
+import com.shub39.grit.core.utils.localized
 import grit.shared.core.generated.resources.Res
 import grit.shared.core.generated.resources.view_day
 import grit.shared.core.generated.resources.week_breakdown
+import kotlinx.datetime.DayOfWeek
 import kotlin.random.Random
 import kotlin.random.nextInt
-import kotlinx.datetime.format.DayOfWeekNames
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -127,7 +128,7 @@ fun WeekDayBreakdown(
                             }
                         }
                         Text(
-                            text = day,
+                            text = stringResource(day.localized()).take(3),
                             color = MaterialTheme.colorScheme.secondary,
                             fontWeight = FontWeight.Bold,
                         )
@@ -145,7 +146,7 @@ private fun Preview() {
     WeekDayBreakdown(
         canSeeContent = true,
         weekDayData =
-            DayOfWeekNames.ENGLISH_ABBREVIATED.names.associateWith { Random.nextInt(0..100) },
+            DayOfWeek.entries.associateWith { Random.nextInt(0..100) },
         onNavigateToPaywall = {},
     )
 }

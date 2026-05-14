@@ -16,6 +16,15 @@
  */
 package com.shub39.grit.core.utils
 
+import grit.shared.core.generated.resources.Res
+import grit.shared.core.generated.resources.monday
+import grit.shared.core.generated.resources.tuesday
+import grit.shared.core.generated.resources.wednesday
+import grit.shared.core.generated.resources.thursday
+import grit.shared.core.generated.resources.friday
+import grit.shared.core.generated.resources.saturday
+import grit.shared.core.generated.resources.sunday
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -74,4 +83,14 @@ fun YearMonth.toFormattedString(): String {
             year()
         }
     )
+}
+
+fun DayOfWeek.localized() = when (this) {
+    DayOfWeek.MONDAY -> Res.string.monday
+    DayOfWeek.TUESDAY -> Res.string.tuesday
+    DayOfWeek.WEDNESDAY -> Res.string.wednesday
+    DayOfWeek.THURSDAY -> Res.string.thursday
+    DayOfWeek.FRIDAY -> Res.string.friday
+    DayOfWeek.SATURDAY -> Res.string.saturday
+    DayOfWeek.SUNDAY -> Res.string.sunday
 }

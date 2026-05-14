@@ -83,4 +83,11 @@
     <string name="select_days">Seleziona Giorni</string>
     <string name="tasks">Task</string>
     <string name="show_habits_desc">Mostra abitudini quando si apre l\u0027app</string>
+    <string name="monday">Lunedì</string>
+    <string name="tuesday">Martedì</string>
+    <string name="wednesday">Mercoledì</string>
+    <string name="thursday">Giovedì</string>
+    <string name="friday">Venerdì</string>
+    <string name="saturday">Sabato</string>
+    <string name="sunday">Domenica</string>
 </resources>
