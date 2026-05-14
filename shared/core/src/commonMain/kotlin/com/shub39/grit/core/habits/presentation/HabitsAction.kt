@@ -53,4 +53,8 @@ sealed interface HabitsAction {
     data object ReorderHabits : HabitsAction
 
     data class FetchCompletedHabitsForDate(val date: LocalDate) : HabitsAction
+
+    data class ShowNotesDialog(val habit: Habit, val date: LocalDate) : HabitsAction
+    data class SaveNotesDialog(val habit: Habit, val date: LocalDate, val notes: String) : HabitsAction
+    data object CloseNotesDialog : HabitsAction
 }

@@ -36,7 +36,9 @@ import kotlinx.datetime.LocalDate
                 onDelete = ForeignKey.CASCADE,
             )
         ],
-    indices = [Index(value = ["habitId"])],
+    indices = [
+        Index(value = ["habitId", "date"], unique = true)
+    ],
 )
 data class HabitStatusEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

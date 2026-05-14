@@ -16,6 +16,7 @@
  */
 package com.shub39.grit.core.habits.presentation.ui.sections
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,10 +25,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shub39.grit.core.habits.domain.Habit
@@ -44,6 +53,7 @@ import com.shub39.grit.core.shared_ui.middleItemShape
 import com.shub39.grit.core.utils.LocalWindowSizeClass
 import com.shub39.grit.core.utils.now
 import grit.shared.core.generated.resources.Res
+import grit.shared.core.generated.resources.backspace
 import grit.shared.core.generated.resources.drag_indicator
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
@@ -143,6 +153,52 @@ fun HabitsList(
             onDismissRequest = { onAction(HabitsAction.DismissAddHabitDialog) },
             onUpsertHabit = { onAction(HabitsAction.AddHabit(it)) },
             is24Hr = state.is24Hr,
+        )
+    }
+
+    if (state.notesDialog != null) {
+        var inputText by remember { mutableStateOf(state.notesDialog.notes) }
+        AlertDialog(
+            onDismissRequest = { onAction(HabitsAction.CloseNotesDialog) },
+            title = { Text("Enter day notes") },
+            text = {
+                Column {
+                    TextField(
+                        value = inputText,
+                        onValueChange = { inputText = it },
+                        placeholder = { Text("Notes") },
+                        singleLine = false,
+                        trailingIcon = {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.backspace),
+                                contentDescription = "clear text",
+                                modifier = Modifier
+                                    .clickable {
+                                        inputText = ""
+                                    }
+                            )
+                        }
+                    )
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    onAction(
+                        HabitsAction.SaveNotesDialog(
+                            habit = state.notesDialog.habit,
+                            date = state.notesDialog.date,
+                            notes = inputText,
+                        )
+                    )
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { onAction(HabitsAction.CloseNotesDialog) }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 }

@@ -18,9 +18,11 @@ package com.shub39.grit.core.habits.presentation
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import com.shub39.grit.core.habits.domain.Habit
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.domain.OverallAnalytics
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 
 /**
  * Represents the overall state for the habits feature.
@@ -50,9 +52,17 @@ data class HabitState(
     val analyticsHabitId: Long? = null,
     val showHabitAddSheet: Boolean = false,
     val editState: Boolean = false,
+    val notesDialog: HabitDialogNoteInfo? = null,
 
     // datastore
     val compactHabitView: Boolean = false,
     val is24Hr: Boolean = false,
     val startingDay: DayOfWeek = DayOfWeek.MONDAY,
+)
+
+@Stable
+data class HabitDialogNoteInfo(
+    val habit: Habit,
+    val date: LocalDate,
+    val notes: String,
 )

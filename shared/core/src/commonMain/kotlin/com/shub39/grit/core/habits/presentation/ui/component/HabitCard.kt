@@ -22,7 +22,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -64,6 +65,7 @@ import grit.shared.core.generated.resources.Res
 import grit.shared.core.generated.resources.analytics
 import grit.shared.core.generated.resources.check_circle
 import grit.shared.core.generated.resources.circle_border
+import grit.shared.core.generated.resources.edit
 import grit.shared.core.generated.resources.heat
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -241,7 +243,8 @@ fun HabitCard(
                 contentPadding = PaddingValues(8.dp),
                 state = weekState,
                 dayContent = { weekDay ->
-                    val done = habitWithAnalytics.statuses.any { it.date == weekDay.date }
+                    val status = habitWithAnalytics.statuses.find { it.date == weekDay.date }
+                    val done = status?.isCompleted() ?: false
                     val validDay =
                         weekDay.date <= today &&
                             weekDay.date.dayOfWeek in habitWithAnalytics.habit.days
@@ -253,11 +256,11 @@ fun HabitCard(
                                     if (done) {
                                         val donePrevious =
                                             habitWithAnalytics.statuses.any {
-                                                it.date == weekDay.date.minusDays(1)
+                                                it.isCompleted() && it.date == weekDay.date.minusDays(1)
                                             }
                                         val doneAfter =
                                             habitWithAnalytics.statuses.any {
-                                                it.date == weekDay.date.plusDays(1)
+                                                it.isCompleted() && it.date == weekDay.date.plusDays(1)
                                             }
                                         val shape =
                                             when {
@@ -286,7 +289,7 @@ fun HabitCard(
                                     } else Modifier
                                 )
                                 .clip(shape = RoundedCornerShape(20.dp))
-                                .clickable(
+                                .combinedClickable(
                                     role = Role.Button,
                                     enabled = validDay,
                                     onClick = {
@@ -297,6 +300,14 @@ fun HabitCard(
                                             )
                                         )
                                     },
+                                    onLongClick = {
+                                        action(
+                                            HabitsAction.ShowNotesDialog(
+                                                habit = habitWithAnalytics.habit,
+                                                date = weekDay.date,
+                                            ),
+                                        )
+                                    }
                                 ),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -325,6 +336,21 @@ fun HabitCard(
                                     if (done) MaterialTheme.colorScheme.onPrimary
                                     else if (!validDay) cardContent.copy(alpha = 0.5f)
                                     else cardContent,
+                            )
+                        }
+
+                        if (status?.notes != null) {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.edit),
+                                contentDescription = "Notes",
+                                tint =
+                                    if (done) MaterialTheme.colorScheme.onPrimary
+                                    else if (!validDay) cardContent.copy(alpha = 0.5f)
+                                    else cardContent,
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = (-6).dp)
                             )
                         }
                     }

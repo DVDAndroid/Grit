@@ -23,12 +23,16 @@ import com.shub39.grit.core.data.toHabitStatus
 import com.shub39.grit.core.data.toHabitStatusEntity
 import com.shub39.grit.core.domain.SettingsDatastore
 import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.habits.domain.HabitCompleted
+import com.shub39.grit.core.habits.domain.HabitCompletion
+import com.shub39.grit.core.habits.domain.HabitOnlyNotes
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.domain.OverallAnalytics
 import com.shub39.grit.core.utils.now
 import com.shub39.grit.habits.data.database.HabitStatusDao
+import com.shub39.grit.habits.data.database.HabitStatusEntity
 import com.shub39.grit.habits.data.database.HabitsDao
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.CoroutineScope
@@ -66,7 +70,7 @@ class HabitRepository(
     private val habitStatuses =
         habitStatusDao
             .getAllHabitStatuses()
-            .map { habitStatuses -> habitStatuses.map { it.toHabitStatus() }.filter { it.isCompleted() } }
+            .map { habitStatuses -> habitStatuses.map { it.toHabitStatus() } }
             .flowOn(Dispatchers.IO)
 
     private val firstDayOfWeek = MutableStateFlow(DayOfWeek.MONDAY)
@@ -102,7 +106,7 @@ class HabitRepository(
             .combine(habitStatuses) { habitsFlow, habitStatusesFlow ->
                 habitsFlow.map { habit ->
                     val habitStatusesForHabit = habitStatusesFlow.filter { it.habitId == habit.id }
-                    val dates = habitStatusesForHabit.map { it.date }
+                    val dates = habitStatusesForHabit.filter { it.isCompleted() }.map { it.date }
 
                     HabitWithAnalytics(
                         habit = habit,
@@ -157,12 +161,20 @@ class HabitRepository(
         return habitStatusDao.getStatusForHabit(id).map { it.toHabitStatus() }
     }
 
+    override suspend fun getStatusByHabitAndDate(habitId: Long, date: LocalDate): HabitStatus? {
+        return habitStatusDao.getStatusByIdForHabit(habitId, date)?.toHabitStatus()
+    }
+
     override suspend fun insertHabitStatus(habitStatus: HabitStatus) {
         habitStatusDao.insertHabitStatus(habitStatus.toHabitStatusEntity())
 
         if (habitStatus.date == LocalDate.now()) {
             notificationManager.cancelNotification(habitId = habitStatus.habitId.toInt())
         }
+    }
+
+    override suspend fun upsertHabitStatus(habitStatus: HabitStatus) {
+        habitStatusDao.upsertHabitStatus(habitStatus.toHabitStatusEntity())
     }
 
     override suspend fun deleteHabitStatus(habitId: Long, date: LocalDate) {

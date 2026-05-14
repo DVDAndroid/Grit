@@ -56,7 +56,7 @@ fun Habit.toHabitEntity(): HabitEntity {
 }
 
 fun HabitStatus.toHabitStatusEntity(): HabitStatusEntity {
-    return HabitStatusEntity(id = id, habitId = habitId, date = date, numberValue = numberValue)
+    return HabitStatusEntity(id = id, habitId = habitId, date = date, ok = ok, notes = notes, numberValue = numberValue)
 }
 
 fun Task.toTaskEntity(): TaskEntity {

@@ -22,8 +22,11 @@ import com.shub39.grit.core.domain.AlarmScheduler
 import com.shub39.grit.core.domain.SettingsDatastore
 import com.shub39.grit.core.habits.domain.Habit
 import com.shub39.grit.core.habits.domain.HabitCompleted
+import com.shub39.grit.core.habits.domain.HabitCompletion
+import com.shub39.grit.core.habits.domain.HabitOnlyNotes
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
+import com.shub39.grit.core.habits.presentation.HabitDialogNoteInfo
 import com.shub39.grit.core.habits.presentation.HabitState
 import com.shub39.grit.core.habits.presentation.HabitsAction
 import kotlin.time.ExperimentalTime
@@ -73,7 +76,7 @@ class HabitViewModel(
 
                 is HabitsAction.DeleteHabit -> deleteHabit(action.habit)
 
-                is HabitsAction.InsertStatus -> insertHabitStatus(action.habit, action.date)
+                is HabitsAction.InsertStatus -> upsertHabitStatus(action.habit, action.date, null)
 
                 is HabitsAction.UpdateHabit -> upsertHabit(action.habit)
 
@@ -118,6 +121,27 @@ class HabitViewModel(
                                 habitState.overallAnalytics.copy(completedHabits = completedHabits)
                         )
                     }
+                }
+
+                is HabitsAction.ShowNotesDialog -> {
+                    _state.update {
+                        it.copy(
+                            notesDialog = HabitDialogNoteInfo(
+                                habit = action.habit,
+                                date = action.date,
+                                notes = repo.getStatusByHabitAndDate(action.habit.id, action.date)?.notes.orEmpty(),
+                            )
+                        )
+                    }
+                }
+
+                is HabitsAction.SaveNotesDialog -> {
+                    upsertHabitStatus(action.habit, action.date, action.notes)
+                    _state.update { it.copy(notesDialog = null) }
+                }
+
+                HabitsAction.CloseNotesDialog -> {
+                    _state.update { it.copy(notesDialog = null) }
                 }
             }
         }
@@ -188,17 +212,56 @@ class HabitViewModel(
         scheduler.cancel(habit)
     }
 
-    private suspend fun insertHabitStatus(habit: Habit, date: LocalDate) {
-        val isHabitCompleted =
-            _state.value.habitsWithAnalytics
-                .find { it.habit == habit }
-                ?.statuses
-                ?.any { it.date == date } ?: false
+    private suspend fun upsertHabitStatus(habit: Habit, date: LocalDate, notes: String?) {
+        val existing = _state.value.habitsWithAnalytics
+            .find { it.habit == habit }
+            ?.statuses
+            ?.find { it.date == date }
 
-        if (isHabitCompleted) {
-            repo.deleteHabitStatus(habit.id, date)
-        } else {
-            repo.insertHabitStatus(HabitStatus(habitId = habit.id, date = date, ok = HabitCompleted, notes = null, numberValue = null))
+        when {
+            // --- CLICK (notes == null) ---
+
+            // No record -> create HabitCompleted
+            notes == null && existing == null -> {
+                repo.upsertHabitStatus(HabitStatus(habitId = habit.id, date = date, ok = HabitCompleted, notes = null, numberValue = null))
+            }
+
+            // HabitCompleted, no notes -> delete
+            notes == null && existing?.ok == HabitCompleted && existing.notes == null -> {
+                repo.deleteHabitStatus(habit.id, date)
+            }
+
+            // HabitCompleted with notes -> downgrade to HabitOnlyNotes, preserve notes
+            notes == null && existing?.ok == HabitCompleted && existing.notes != null -> {
+                repo.upsertHabitStatus(existing.copy(ok = HabitOnlyNotes))
+            }
+
+            // HabitOnlyNotes -> upgrade to HabitCompleted, preserve notes
+            notes == null && existing?.ok == HabitOnlyNotes -> {
+                repo.upsertHabitStatus(existing.copy(ok = HabitCompleted))
+            }
+
+            // --- SAVE NOTES (notes != null) ---
+
+            // No record -> create HabitOnlyNotes
+            notes != null && existing == null -> {
+                repo.upsertHabitStatus(HabitStatus(habitId = habit.id, date = date, ok = HabitOnlyNotes, notes = notes, numberValue = null))
+            }
+
+            // Any existing record -> update notes, preserve ok
+            notes != null && existing != null && notes.isNotEmpty() -> {
+                repo.upsertHabitStatus(existing.copy(notes = notes))
+            }
+
+            // Empty notes + HabitOnlyNotes -> delete record
+            notes != null && notes.isEmpty() && existing?.ok == HabitOnlyNotes -> {
+                repo.deleteHabitStatus(habit.id, date)
+            }
+
+            // Empty notes + HabitCompleted -> clear notes, keep completed
+            notes != null && notes.isEmpty() && existing?.ok == HabitCompleted -> {
+                repo.upsertHabitStatus(existing.copy(notes = null))
+            }
         }
     }
 }

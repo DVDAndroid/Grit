@@ -38,10 +38,13 @@ interface HabitStatusDao {
     suspend fun insertHabitStatus(habitStatusEntity: HabitStatusEntity)
 
     @Upsert
-    suspend fun updateHabitStatus(habitStatusEntity: HabitStatusEntity)
+    suspend fun upsertHabitStatus(habitStatusEntity: HabitStatusEntity)
 
     @Query("SELECT * FROM habit_status WHERE habitId = :habitId")
     suspend fun getStatusForHabit(habitId: Long): List<HabitStatusEntity>
+
+    @Query("SELECT * FROM habit_status WHERE habitId = :habitId AND date = :date LIMIT 1")
+    suspend fun getStatusByIdForHabit(habitId: Long, date: LocalDate): HabitStatusEntity?
 
     @Query("DELETE FROM habit_status WHERE habitId = :habitId AND date = :date")
     suspend fun deleteStatus(habitId: Long, date: LocalDate)
