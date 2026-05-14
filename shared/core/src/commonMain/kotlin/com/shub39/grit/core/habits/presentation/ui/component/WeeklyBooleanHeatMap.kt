@@ -47,6 +47,8 @@ import com.kizitonwose.calendar.core.minusDays
 import com.kizitonwose.calendar.core.now
 import com.kizitonwose.calendar.core.plusDays
 import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.habits.domain.HabitBoolean
+import com.shub39.grit.core.habits.domain.HabitCompleted
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.domain.StreakPosition
 import com.shub39.grit.core.habits.domain.heatMapStreakShape
@@ -265,10 +267,17 @@ private fun Preview() {
                 days = DayOfWeek.entries.toSet(),
                 index = 1,
                 reminder = false,
+                type = HabitBoolean,
             ),
         statuses =
             (0..40).map {
-                HabitStatus(habitId = 1, date = LocalDate.now().minus(it, DateTimeUnit.DAY))
+                HabitStatus(
+                    habitId = 1,
+                    date = LocalDate.now().minus(it, DateTimeUnit.DAY),
+                    ok = HabitCompleted,
+                    notes = null,
+                    numberValue = null,
+                )
             },
     )
 }

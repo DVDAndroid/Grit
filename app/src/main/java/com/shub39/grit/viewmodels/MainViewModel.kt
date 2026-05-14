@@ -56,7 +56,7 @@ class MainViewModel(
             .asStateFlow()
             .onStart {
                 checkSubscription()
-                checkChangelog()
+//                checkChangelog()
                 observeDatastore()
             }
             .stateIn(

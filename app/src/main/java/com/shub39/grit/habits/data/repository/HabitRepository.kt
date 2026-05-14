@@ -36,6 +36,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -65,7 +66,7 @@ class HabitRepository(
     private val habitStatuses =
         habitStatusDao
             .getAllHabitStatuses()
-            .map { habitStatuses -> habitStatuses.map { it.toHabitStatus() } }
+            .map { habitStatuses -> habitStatuses.map { it.toHabitStatus() }.filter { it.isCompleted() } }
             .flowOn(Dispatchers.IO)
 
     private val firstDayOfWeek = MutableStateFlow(DayOfWeek.MONDAY)

@@ -65,6 +65,7 @@ import androidx.glance.text.TextStyle
 import com.shub39.grit.R
 import com.shub39.grit.app.MainActivity
 import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.habits.domain.HabitBoolean
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.utils.now
@@ -138,6 +139,7 @@ class HabitStreakWidget : GlanceAppWidget(), KoinComponent {
                                 days = setOf(),
                                 index = 1,
                                 reminder = false,
+                                type = HabitBoolean,
                             ),
                         statuses = listOf(),
                         weeklyComparisonData = listOf(),
@@ -488,6 +490,7 @@ private fun GlancePreview() {
                         days = setOf(),
                         index = 1,
                         reminder = false,
+                        type = HabitBoolean,
                     ),
                 statuses = listOf(),
                 weeklyComparisonData = listOf(),

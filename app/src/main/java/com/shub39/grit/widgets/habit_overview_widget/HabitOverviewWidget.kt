@@ -61,6 +61,8 @@ import androidx.glance.text.TextStyle
 import com.shub39.grit.R
 import com.shub39.grit.app.MainActivity
 import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.habits.domain.HabitBoolean
+import com.shub39.grit.core.habits.domain.HabitCompleted
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.utils.now
@@ -104,6 +106,9 @@ class HabitOverviewWidget : GlanceAppWidget(), KoinComponent {
                                             HabitStatus(
                                                 habitId = habitWithStatus.first.id,
                                                 date = LocalDate.now(),
+                                                ok = HabitCompleted,
+                                                notes = null,
+                                                numberValue = null,
                                             )
                                     )
                                 }
@@ -129,6 +134,7 @@ class HabitOverviewWidget : GlanceAppWidget(), KoinComponent {
                     days = emptySet(),
                     index = 1,
                     reminder = false,
+                    type = HabitBoolean,
                 ) to true,
                 Habit(
                     id = 2,
@@ -138,6 +144,7 @@ class HabitOverviewWidget : GlanceAppWidget(), KoinComponent {
                     days = setOf(),
                     index = 2,
                     reminder = false,
+                    type = HabitBoolean,
                 ) to false,
             )
 
@@ -316,6 +323,7 @@ private fun GlancePreview() {
                     days = emptySet(),
                     index = it,
                     reminder = false,
+                    type = HabitBoolean,
                 ) to (it % 2 == 0)
             },
         onUpdateHabit = {},

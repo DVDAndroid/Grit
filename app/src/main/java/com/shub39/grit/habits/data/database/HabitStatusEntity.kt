@@ -16,10 +16,13 @@
  */
 package com.shub39.grit.habits.data.database
 
+import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
+import com.shub39.grit.core.habits.domain.HabitCompleted
+import com.shub39.grit.core.habits.domain.HabitCompletion
 import kotlinx.datetime.LocalDate
 
 @Entity(
@@ -39,4 +42,7 @@ data class HabitStatusEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val habitId: Long,
     val date: LocalDate,
+    @ColumnInfo(name = "ok", defaultValue = "1") val ok: HabitCompletion = HabitCompleted,
+    val notes: String? = null,
+    val numberValue: Float? = null,
 )

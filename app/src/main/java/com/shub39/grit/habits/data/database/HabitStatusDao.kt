@@ -20,6 +20,8 @@ import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
+import androidx.room3.Update
+import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
 
@@ -34,6 +36,9 @@ interface HabitStatusDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHabitStatus(habitStatusEntity: HabitStatusEntity)
+
+    @Upsert
+    suspend fun updateHabitStatus(habitStatusEntity: HabitStatusEntity)
 
     @Query("SELECT * FROM habit_status WHERE habitId = :habitId")
     suspend fun getStatusForHabit(habitId: Long): List<HabitStatusEntity>

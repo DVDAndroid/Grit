@@ -63,6 +63,7 @@ import androidx.glance.text.TextStyle
 import com.shub39.grit.R
 import com.shub39.grit.app.MainActivity
 import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.habits.domain.HabitBoolean
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.utils.now
@@ -137,6 +138,7 @@ class HabitWeekChartWidget : GlanceAppWidget(), KoinComponent {
                                 days = setOf(),
                                 index = 1,
                                 reminder = false,
+                                type = HabitBoolean,
                             ),
                         statuses = listOf(),
                         weeklyComparisonData = (0..7).map { it.toDouble() },
@@ -302,6 +304,7 @@ private fun GlancePreview() {
                         days = setOf(),
                         index = 1,
                         reminder = false,
+                        type = HabitBoolean,
                     ),
                 statuses = listOf(),
                 weeklyComparisonData = (0..10).map { Random.nextDouble(0.0, 10.0) },

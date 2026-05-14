@@ -21,6 +21,7 @@ import androidx.lifecycle.viewModelScope
 import com.shub39.grit.core.domain.AlarmScheduler
 import com.shub39.grit.core.domain.SettingsDatastore
 import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.habits.domain.HabitCompleted
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.presentation.HabitState
@@ -197,7 +198,7 @@ class HabitViewModel(
         if (isHabitCompleted) {
             repo.deleteHabitStatus(habit.id, date)
         } else {
-            repo.insertHabitStatus(HabitStatus(habitId = habit.id, date = date))
+            repo.insertHabitStatus(HabitStatus(habitId = habit.id, date = date, ok = HabitCompleted, notes = null, numberValue = null))
         }
     }
 }

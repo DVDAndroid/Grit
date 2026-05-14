@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.habits.domain.HabitBoolean
 import com.shub39.grit.core.habits.presentation.HabitState
 import com.shub39.grit.core.habits.presentation.HabitsAction
 import com.shub39.grit.core.habits.presentation.ui.component.HabitCard
@@ -137,6 +138,7 @@ fun HabitsList(
                     days = DayOfWeek.entries.toSet(),
                     index = state.habitsWithAnalytics.size,
                     reminder = false,
+                    type = HabitBoolean,
                 ),
             onDismissRequest = { onAction(HabitsAction.DismissAddHabitDialog) },
             onUpsertHabit = { onAction(HabitsAction.AddHabit(it)) },

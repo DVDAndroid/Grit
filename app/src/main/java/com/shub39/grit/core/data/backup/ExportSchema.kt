@@ -16,6 +16,8 @@
  */
 package com.shub39.grit.core.data.backup
 
+import com.shub39.grit.core.habits.domain.HabitCompletion
+import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.habits.data.database.HabitDatabase
 import com.shub39.grit.tasks.data.database.TaskDatabase
 import kotlinx.serialization.Serializable
@@ -39,9 +41,17 @@ data class HabitSchema(
     val time: Long,
     val days: String,
     val reminder: Boolean,
+    val type: HabitType,
 )
 
-@Serializable data class HabitStatusSchema(val id: Long = 0, val habitId: Long, val date: Long)
+@Serializable data class HabitStatusSchema(
+    val id: Long = 0,
+    val habitId: Long,
+    val date: Long,
+    val ok: HabitCompletion,
+    val notes: String?,
+    val numberValue: Float?
+)
 
 @Serializable
 data class TaskSchema(

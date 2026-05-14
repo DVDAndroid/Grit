@@ -23,6 +23,7 @@ import android.util.Log
 import com.shub39.grit.core.domain.AlarmScheduler
 import com.shub39.grit.core.domain.IntentActions
 import com.shub39.grit.core.domain.SettingsDatastore
+import com.shub39.grit.core.habits.domain.HabitCompleted
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.tasks.domain.TaskRepo
@@ -36,6 +37,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import kotlin.random.Random
 
 class GritIntentReceiver : BroadcastReceiver(), KoinComponent {
 
@@ -95,10 +97,12 @@ class GritIntentReceiver : BroadcastReceiver(), KoinComponent {
         Log.d(TAG, "Add habit status intent received")
         val habitId = intent.getLongExtra("habit_id", -1)
         if (habitId < 0) return
+        val random = Random.nextFloat()
+        val habitNumberValue = intent.getFloatExtra("habit_numbervalue", random).takeIf { it != random }
 
         val habitRepo = get<HabitRepo>()
 
-        habitRepo.insertHabitStatus(HabitStatus(habitId = habitId, date = LocalDate.now()))
+        habitRepo.insertHabitStatus(HabitStatus(habitId = habitId, date = LocalDate.now(), ok = HabitCompleted, notes = null, numberValue = habitNumberValue))
 
         Log.d(TAG, "Habit status added successfully")
 

@@ -34,11 +34,12 @@ fun HabitEntity.toHabit(): Habit {
         days = days,
         index = index,
         reminder = reminder,
+        type = type,
     )
 }
 
 fun HabitStatusEntity.toHabitStatus(): HabitStatus {
-    return HabitStatus(id = id, habitId = habitId, date = date)
+    return HabitStatus(id = id, habitId = habitId, date = date, ok = ok, notes = notes, numberValue = numberValue)
 }
 
 fun Habit.toHabitEntity(): HabitEntity {
@@ -50,11 +51,12 @@ fun Habit.toHabitEntity(): HabitEntity {
         index = index,
         days = days,
         reminder = reminder,
+        type = type,
     )
 }
 
 fun HabitStatus.toHabitStatusEntity(): HabitStatusEntity {
-    return HabitStatusEntity(id = id, habitId = habitId, date = date)
+    return HabitStatusEntity(id = id, habitId = habitId, date = date, numberValue = numberValue)
 }
 
 fun Task.toTaskEntity(): TaskEntity {

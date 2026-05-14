@@ -47,6 +47,6 @@ dependencyResolutionManagement {
 
 include(":app")
 
-include(":webdemo")
+//include(":webdemo")
 
 include(":shared:core")

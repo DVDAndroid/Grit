@@ -37,6 +37,7 @@ fun Habit.toHabitSchema(): HabitSchema {
         time = time.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds(),
         days = Converters.dayOfWeekToString(days),
         reminder = reminder,
+        type = type,
     )
 }
 
@@ -50,15 +51,30 @@ fun HabitSchema.toHabit(): Habit {
         time = Instant.fromEpochMilliseconds(time).toLocalDateTime(TimeZone.currentSystemDefault()),
         days = Converters.dayOfWeekFromString(days),
         reminder = reminder,
+        type = type,
     )
 }
 
 fun HabitStatus.toHabitStatusSchema(): HabitStatusSchema {
-    return HabitStatusSchema(id = id, habitId = habitId, date = Converters.dayToTimestamp(date))
+    return HabitStatusSchema(
+        id = id,
+        habitId = habitId,
+        date = Converters.dayToTimestamp(date),
+        ok = ok,
+        notes = notes,
+        numberValue = numberValue
+    )
 }
 
 fun HabitStatusSchema.toHabitStatus(): HabitStatus {
-    return HabitStatus(id = id, habitId = habitId, date = Converters.dayFromTimestamp(date))
+    return HabitStatus(
+        id = id,
+        habitId = habitId,
+        date = Converters.dayFromTimestamp(date),
+        ok = ok,
+        notes = notes,
+        numberValue = numberValue
+    )
 }
 
 fun TaskSchema.toTask(): Task {
