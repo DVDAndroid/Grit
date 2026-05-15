@@ -16,10 +16,12 @@
  */
 package com.shub39.grit.core.habits.domain
 
+import androidx.compose.runtime.Stable
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
+@Stable
 @Serializable
 data class Habit(
     val id: Long = 0,

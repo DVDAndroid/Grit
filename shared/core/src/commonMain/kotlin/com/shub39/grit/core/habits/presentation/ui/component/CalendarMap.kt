@@ -19,13 +19,17 @@ package com.shub39.grit.core.habits.presentation.ui.component
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,6 +64,7 @@ import com.shub39.grit.core.utils.GritPreviewWrapper
 import com.shub39.grit.core.utils.now
 import grit.shared.core.generated.resources.Res
 import grit.shared.core.generated.resources.calendar_month
+import grit.shared.core.generated.resources.edit
 import grit.shared.core.generated.resources.monthly_progress
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
@@ -73,6 +78,7 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 
 /** Boolean Calendar map highlighting days */
 @Composable
@@ -88,8 +94,10 @@ fun CalendarMap(
     val today = LocalDate.now()
     val scope = rememberCoroutineScope()
 
+    val notesDates =
+        remember(currentHabit.statuses) { currentHabit.statuses.filter { it.hasNotes() }.map { it.date }.toSet() }
     val doneDates =
-        remember(currentHabit.statuses) { currentHabit.statuses.map { it.date }.toSet() }
+        remember(currentHabit.statuses) { currentHabit.statuses.filter { it.isCompleted() }.map { it.date }.toSet() }
     val edgeWeeks =
         listOf(calendarState.firstDayOfWeek, daysStartingFrom(calendarState.firstDayOfWeek).last())
 
@@ -143,6 +151,7 @@ fun CalendarMap(
             },
             dayContent = { day ->
                 if (day.position.name == "MonthDate") {
+                    val withNote = day.date in notesDates
                     val done = day.date in doneDates
                     val validDate =
                         day.date <= today && day.date.dayOfWeek in currentHabit.habit.days
@@ -177,11 +186,15 @@ fun CalendarMap(
                                         isLastDayOfMonth = day.date.plusDays(1).day == 1,
                                     )
                                 )
-                                .clickable(enabled = validDate) {
-                                    onAction(
-                                        HabitsAction.InsertStatus(currentHabit.habit, day.date)
-                                    )
-                                },
+                                .combinedClickable(
+                                    enabled = validDate,
+                                    onClick = {
+                                        onAction(HabitsAction.InsertStatus(currentHabit.habit, day.date))
+                                    },
+                                    onLongClick = {
+                                        onAction(HabitsAction.ShowNotesDialog(currentHabit.habit, day.date))
+                                    },
+                                ),
                         contentAlignment = Alignment.Center,
                     ) {
                         if (done) {
@@ -206,6 +219,18 @@ fun CalendarMap(
                                                 ),
                                         contentAlignment = Alignment.Center,
                                     ) {
+                                        if (withNote) {
+                                            Icon(
+                                                imageVector = vectorResource(Res.drawable.edit),
+                                                contentDescription = "Notes",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier
+                                                    .size(14.dp)
+                                                    .align(Alignment.TopEnd)
+                                                    .offset(x = (-4).dp)
+                                            )
+                                        }
+
                                         Text(
                                             text = day.date.day.toString(),
                                             style = MaterialTheme.typography.bodyLarge,
@@ -213,6 +238,18 @@ fun CalendarMap(
                                         )
                                     }
                                 } else {
+                                    if (withNote) {
+                                        Icon(
+                                            imageVector = vectorResource(Res.drawable.edit),
+                                            contentDescription = "Notes",
+                                            tint = MaterialTheme.colorScheme.onPrimary,
+                                            modifier = Modifier
+                                                .size(14.dp)
+                                                .align(Alignment.TopEnd)
+                                                .offset(x = (-4).dp)
+                                        )
+                                    }
+
                                     Text(
                                         text = day.date.day.toString(),
                                         style = MaterialTheme.typography.bodyLarge,
@@ -221,6 +258,18 @@ fun CalendarMap(
                                 }
                             }
                         } else {
+                            if (withNote) {
+                                Icon(
+                                    imageVector = vectorResource(Res.drawable.edit),
+                                    contentDescription = "Notes",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                        .size(14.dp)
+                                        .align(Alignment.TopEnd)
+                                        .offset(x = (-4).dp)
+                                )
+                            }
+
                             Text(
                                 text = day.date.day.toString(),
                                 style = MaterialTheme.typography.bodyLarge,

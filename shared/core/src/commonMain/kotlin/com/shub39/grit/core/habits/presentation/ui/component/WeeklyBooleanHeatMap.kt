@@ -18,15 +18,18 @@ package com.shub39.grit.core.habits.presentation.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -60,6 +63,7 @@ import com.shub39.grit.core.utils.GritPreviewWrapper
 import com.shub39.grit.core.utils.localized
 import com.shub39.grit.core.utils.now
 import grit.shared.core.generated.resources.Res
+import grit.shared.core.generated.resources.edit
 import grit.shared.core.generated.resources.view_week
 import grit.shared.core.generated.resources.weekly_progress
 import kotlinx.coroutines.launch
@@ -73,6 +77,7 @@ import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun WeeklyBooleanHeatMap(
@@ -85,7 +90,10 @@ fun WeeklyBooleanHeatMap(
     val today = LocalDate.now()
     val scope = rememberCoroutineScope()
 
-    val doneDates = remember(statuses) { statuses.map { it.date }.toSet() }
+    val notesDates =
+        remember(statuses) { statuses.filter { it.hasNotes() }.map { it.date }.toSet() }
+    val doneDates =
+        remember(statuses) { statuses.filter { it.isCompleted() }.map { it.date }.toSet() }
     val edgeWeeks =
         listOf(heatMapState.firstDayOfWeek, daysStartingFrom(heatMapState.firstDayOfWeek).last())
 
@@ -164,6 +172,7 @@ fun WeeklyBooleanHeatMap(
                     dayContent = { day, _ ->
                         if (day.date > today) return@HeatMapCalendar
 
+                        val withNote = day.date in notesDates
                         val done = day.date in doneDates
                         val validDay = day.date.dayOfWeek in habit.days
 
@@ -189,9 +198,15 @@ fun WeeklyBooleanHeatMap(
                                 Modifier.padding(horizontal = 1.dp)
                                     .size(35.dp)
                                     .clip(shape)
-                                    .clickable(enabled = validDay) {
-                                        onAction(HabitsAction.InsertStatus(habit, day.date))
-                                    },
+                                    .combinedClickable(
+                                        enabled = validDay,
+                                        onClick = {
+                                            onAction(HabitsAction.InsertStatus(habit, day.date))
+                                        },
+                                        onLongClick = {
+                                            onAction(HabitsAction.ShowNotesDialog(habit, day.date))
+                                        }
+                                    ),
                             contentAlignment = Alignment.Center,
                         ) {
                             if (done) {
@@ -214,6 +229,17 @@ fun WeeklyBooleanHeatMap(
                                                     ),
                                             contentAlignment = Alignment.Center,
                                         ) {
+                                            if (withNote) {
+                                                Icon(
+                                                    imageVector = vectorResource(Res.drawable.edit),
+                                                    contentDescription = "Notes",
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier
+                                                        .size(12.dp)
+                                                        .align(Alignment.TopEnd)
+                                                )
+                                            }
+
                                             Text(
                                                 text = day.date.day.toString(),
                                                 style = MaterialTheme.typography.bodyMedium,
@@ -221,6 +247,17 @@ fun WeeklyBooleanHeatMap(
                                             )
                                         }
                                     } else {
+                                        if (withNote) {
+                                            Icon(
+                                                imageVector = vectorResource(Res.drawable.edit),
+                                                contentDescription = "Notes",
+                                                tint = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier
+                                                    .size(12.dp)
+                                                    .align(Alignment.TopEnd)
+                                            )
+                                        }
+
                                         Text(
                                             text = day.date.day.toString(),
                                             style = MaterialTheme.typography.bodyMedium,
@@ -229,6 +266,17 @@ fun WeeklyBooleanHeatMap(
                                     }
                                 }
                             } else {
+                                if (withNote) {
+                                    Icon(
+                                        imageVector = vectorResource(Res.drawable.edit),
+                                        contentDescription = "Notes",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier
+                                            .size(12.dp)
+                                            .align(Alignment.TopEnd)
+                                    )
+                                }
+
                                 Text(
                                     text = day.date.day.toString(),
                                     style = MaterialTheme.typography.bodyMedium,

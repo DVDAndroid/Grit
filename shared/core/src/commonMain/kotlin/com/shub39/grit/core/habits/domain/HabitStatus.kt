@@ -16,10 +16,13 @@
  */
 package com.shub39.grit.core.habits.domain
 
+import androidx.compose.runtime.Stable
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
-@Serializable data class HabitStatus(
+@Stable
+@Serializable
+data class HabitStatus(
     val id: Long = 0,
     val habitId: Long,
     val date: LocalDate,
@@ -29,4 +32,6 @@ import kotlinx.serialization.Serializable
 ) {
 
     fun isCompleted() = ok == HabitCompleted
+
+    fun hasNotes() = notes?.isNotBlank() ?: false
 }

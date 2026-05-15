@@ -121,6 +121,7 @@ fun prepareLineChartData(
 
     val habitCompletionByWeek =
         habitStatuses
+            .filter { it.isCompleted() }
             .filter { it.date in startDateOfPeriod..today }
             .groupBy {
                 // Calculate the start date of the week for the given habit date

@@ -18,6 +18,7 @@ package com.shub39.grit.core.habits.presentation.ui.sections
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonShapes
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -44,6 +47,7 @@ import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.toShape
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -78,6 +82,7 @@ import com.shub39.grit.core.theme.flexFontRounded
 import com.shub39.grit.core.utils.LocalWindowSizeClass
 import grit.shared.core.generated.resources.Res
 import grit.shared.core.generated.resources.arrow_back
+import grit.shared.core.generated.resources.backspace
 import grit.shared.core.generated.resources.cancel
 import grit.shared.core.generated.resources.delete
 import grit.shared.core.generated.resources.delete_warning
@@ -323,4 +328,51 @@ fun AnalyticsPage(
             isEditSheet = true,
         )
     }
+
+    if (state.notesDialog != null) {
+        var inputText by remember { mutableStateOf(state.notesDialog.notes) }
+        AlertDialog(
+            onDismissRequest = { onAction(HabitsAction.CloseNotesDialog) },
+            title = { Text("Enter day notes") },
+            text = {
+                Column {
+                    TextField(
+                        value = inputText,
+                        onValueChange = { inputText = it },
+                        placeholder = { Text("Notes") },
+                        singleLine = false,
+                        trailingIcon = {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.backspace),
+                                contentDescription = "clear text",
+                                modifier = Modifier
+                                    .clickable {
+                                        inputText = ""
+                                    }
+                            )
+                        }
+                    )
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    onAction(
+                        HabitsAction.SaveNotesDialog(
+                            habit = state.notesDialog.habit,
+                            date = state.notesDialog.date,
+                            notes = inputText,
+                        )
+                    )
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { onAction(HabitsAction.CloseNotesDialog) }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
 }

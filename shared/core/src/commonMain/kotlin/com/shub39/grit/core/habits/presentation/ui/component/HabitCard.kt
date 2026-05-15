@@ -352,7 +352,7 @@ fun HabitCard(
                                 modifier = Modifier
                                     .size(14.dp)
                                     .align(Alignment.TopEnd)
-                                    .offset(x = (-6).dp)
+                                    .offset(x = (-4).dp)
                             )
                         }
                     }
