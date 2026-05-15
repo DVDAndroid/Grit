@@ -19,6 +19,7 @@ package com.shub39.grit.core.habits.presentation.ui.component
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,10 +45,12 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
@@ -69,7 +72,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.shub39.grit.core.habits.domain.Habit
 import com.shub39.grit.core.habits.domain.HabitBoolean
+import com.shub39.grit.core.habits.presentation.formatDateWithOrdinal
 import com.shub39.grit.core.shared_ui.GritBottomSheet
+import com.shub39.grit.core.shared_ui.GritDatePicker
 import com.shub39.grit.core.shared_ui.GritTimePicker
 import com.shub39.grit.core.shared_ui.detachedItemShape
 import com.shub39.grit.core.shared_ui.endItemShape
@@ -92,16 +97,22 @@ import grit.shared.core.generated.resources.edit
 import grit.shared.core.generated.resources.edit_habit
 import grit.shared.core.generated.resources.save
 import grit.shared.core.generated.resources.select_days
+import grit.shared.core.generated.resources.started_on
 import grit.shared.core.generated.resources.title
 import grit.shared.core.generated.resources.too_long
 import grit.shared.core.generated.resources.update_description
 import grit.shared.core.generated.resources.update_title
 import kotlinx.coroutines.delay
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Composable
 expect fun HabitUpsertSheet(
@@ -129,6 +140,7 @@ fun HabitUpsertSheetContent(
     val focusRequester = remember { FocusRequester() }
 
     var timePickerDialog by remember { mutableStateOf(false) }
+    var datePickerDialog by remember { mutableStateOf(false) }
 
     val titleTextFieldState =
         rememberTextFieldState(
@@ -248,6 +260,46 @@ fun HabitUpsertSheetContent(
             item {
                 Spacer(modifier = Modifier.height(4.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Column {
+                        Card(
+                            shape = leadingItemShape(bottomRadius = 0),
+                            modifier = Modifier.animateContentSize(),
+                            colors =
+                                CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                ),
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.started_on),
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .fillMaxWidth(),
+                            )
+                        }
+                        ListItem(
+                            colors = listItemColors(),
+                            modifier = Modifier
+                                .clip(middleItemShape()),
+                            headlineContent = {
+                                Text(
+                                    text = formatDateWithOrdinal(newHabit.time.date),
+                                    style =
+                                        MaterialTheme.typography.titleLarge.copy(
+                                            fontFamily = flexFontRounded()
+                                        ),
+                                )
+                            },
+                            trailingContent = {
+                                FilledTonalIconButton(onClick = { datePickerDialog = true }) {
+                                    Icon(
+                                        imageVector = vectorResource(Res.drawable.edit),
+                                        contentDescription = "Pick date",
+                                    )
+                                }
+                            },
+                        )
+                    }
+
                     Card(
                         shape =
                             if (newHabit.days.isEmpty()) detachedItemShape()
@@ -407,6 +459,36 @@ fun HabitUpsertSheetContent(
                         )
                     )
                     timePickerDialog = false
+                },
+            )
+        }
+
+        if (datePickerDialog) {
+            val datePickerState = rememberDatePickerState(
+                selectableDates = object : SelectableDates {
+                    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                        return Clock.System.now().toEpochMilliseconds() > utcTimeMillis
+                    }
+                },
+            )
+
+            GritDatePicker(
+                onDismissRequest = { datePickerDialog = false },
+                state = datePickerState,
+                onConfirm = {
+                    val newDate = Instant.fromEpochMilliseconds(
+                        datePickerState.selectedDateMillis ?: Clock.System.now().toEpochMilliseconds()
+                    ).toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    updateHabit(
+                        newHabit.copy(
+                            time =
+                                LocalDateTime(
+                                    date = newDate,
+                                    time = newHabit.time.time,
+                                )
+                        )
+                    )
+                    datePickerDialog = false
                 },
             )
         }
