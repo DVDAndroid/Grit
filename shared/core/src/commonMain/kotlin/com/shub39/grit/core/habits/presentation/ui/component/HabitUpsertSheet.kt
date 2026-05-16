@@ -71,7 +71,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.shub39.grit.core.habits.domain.Habit
-import com.shub39.grit.core.habits.domain.HabitBoolean
+import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.presentation.formatDateWithOrdinal
 import com.shub39.grit.core.shared_ui.GritBottomSheet
 import com.shub39.grit.core.shared_ui.GritDatePicker
@@ -509,7 +509,7 @@ private fun Preview() {
                     days = DayOfWeek.entries.toSet(),
                     index = 1,
                     reminder = false,
-                    type = HabitBoolean,
+                    type = HabitType.Boolean,
                 ),
             onDismissRequest = {},
             onUpsertHabit = {},

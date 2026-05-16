@@ -21,9 +21,7 @@ import androidx.lifecycle.viewModelScope
 import com.shub39.grit.core.domain.AlarmScheduler
 import com.shub39.grit.core.domain.SettingsDatastore
 import com.shub39.grit.core.habits.domain.Habit
-import com.shub39.grit.core.habits.domain.HabitCompleted
 import com.shub39.grit.core.habits.domain.HabitCompletion
-import com.shub39.grit.core.habits.domain.HabitOnlyNotes
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.presentation.HabitDialogNoteInfo
@@ -221,31 +219,31 @@ class HabitViewModel(
         when {
             // --- CLICK (notes == null) ---
 
-            // No record -> create HabitCompleted
+            // No record -> create HabitCompletion.Completed
             notes == null && existing == null -> {
-                repo.upsertHabitStatus(HabitStatus(habitId = habit.id, date = date, ok = HabitCompleted, notes = null, numberValue = null))
+                repo.upsertHabitStatus(HabitStatus(habitId = habit.id, date = date, ok = HabitCompletion.Completed, notes = null, numberValue = null))
             }
 
-            // HabitCompleted, no notes -> delete
-            notes == null && existing?.ok == HabitCompleted && existing.notes == null -> {
+            // HabitCompletion.Completed, no notes -> delete
+            notes == null && existing?.ok == HabitCompletion.Completed && existing.notes == null -> {
                 repo.deleteHabitStatus(habit.id, date)
             }
 
-            // HabitCompleted with notes -> downgrade to HabitOnlyNotes, preserve notes
-            notes == null && existing?.ok == HabitCompleted && existing.notes != null -> {
-                repo.upsertHabitStatus(existing.copy(ok = HabitOnlyNotes))
+            // HabitCompletion.Completed with notes -> downgrade to HabitCompletion.OnlyNotes, preserve notes
+            notes == null && existing?.ok == HabitCompletion.Completed && existing.notes != null -> {
+                repo.upsertHabitStatus(existing.copy(ok = HabitCompletion.OnlyNotes))
             }
 
-            // HabitOnlyNotes -> upgrade to HabitCompleted, preserve notes
-            notes == null && existing?.ok == HabitOnlyNotes -> {
-                repo.upsertHabitStatus(existing.copy(ok = HabitCompleted))
+            // HabitCompletion.OnlyNotes -> upgrade to HabitCompletion.Completed, preserve notes
+            notes == null && existing?.ok == HabitCompletion.OnlyNotes -> {
+                repo.upsertHabitStatus(existing.copy(ok = HabitCompletion.Completed))
             }
 
             // --- SAVE NOTES (notes != null) ---
 
-            // No record -> create HabitOnlyNotes
+            // No record -> create HabitCompletion.OnlyNotes
             notes != null && existing == null -> {
-                repo.upsertHabitStatus(HabitStatus(habitId = habit.id, date = date, ok = HabitOnlyNotes, notes = notes, numberValue = null))
+                repo.upsertHabitStatus(HabitStatus(habitId = habit.id, date = date, ok = HabitCompletion.OnlyNotes, notes = notes, numberValue = null))
             }
 
             // Any existing record -> update notes, preserve ok
@@ -253,13 +251,13 @@ class HabitViewModel(
                 repo.upsertHabitStatus(existing.copy(notes = notes))
             }
 
-            // Empty notes + HabitOnlyNotes -> delete record
-            notes != null && notes.isEmpty() && existing?.ok == HabitOnlyNotes -> {
+            // Empty notes + HabitCompletion.OnlyNotes -> delete record
+            notes != null && notes.isEmpty() && existing?.ok == HabitCompletion.OnlyNotes -> {
                 repo.deleteHabitStatus(habit.id, date)
             }
 
-            // Empty notes + HabitCompleted -> clear notes, keep completed
-            notes != null && notes.isEmpty() && existing?.ok == HabitCompleted -> {
+            // Empty notes + HabitCompletion.Completed -> clear notes, keep completed
+            notes != null && notes.isEmpty() && existing?.ok == HabitCompletion.Completed -> {
                 repo.upsertHabitStatus(existing.copy(notes = null))
             }
         }

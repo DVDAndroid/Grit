@@ -23,9 +23,6 @@ import com.shub39.grit.core.data.toHabitStatus
 import com.shub39.grit.core.data.toHabitStatusEntity
 import com.shub39.grit.core.domain.SettingsDatastore
 import com.shub39.grit.core.habits.domain.Habit
-import com.shub39.grit.core.habits.domain.HabitCompleted
-import com.shub39.grit.core.habits.domain.HabitCompletion
-import com.shub39.grit.core.habits.domain.HabitOnlyNotes
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics

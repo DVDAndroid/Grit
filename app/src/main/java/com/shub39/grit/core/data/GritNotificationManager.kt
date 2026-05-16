@@ -31,8 +31,7 @@ import androidx.core.app.RemoteInput
 import com.shub39.grit.R
 import com.shub39.grit.core.domain.IntentActions
 import com.shub39.grit.core.habits.domain.Habit
-import com.shub39.grit.core.habits.domain.HabitCompleted
-import com.shub39.grit.core.habits.domain.HabitOnlyNotes
+import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.tasks.domain.Task
 import org.koin.core.annotation.Single
 
@@ -64,12 +63,12 @@ class GritNotificationManager(private val context: Context) {
 
         val completedHabitIntent = Intent(context, GritIntentReceiver::class.java).apply {
             putExtra("habit_id", habit.id)
-            putExtra("habit_ok", HabitCompleted.ok)
+            putExtra("habit_ok", HabitCompletion.Completed.ok)
             action = IntentActions.ADD_HABIT_STATUS.action
         }
         val onlyNoteHabitIntent = Intent(context, GritIntentReceiver::class.java).apply {
             putExtra("habit_id", habit.id)
-            putExtra("habit_ok", HabitOnlyNotes.ok)
+            putExtra("habit_ok", HabitCompletion.OnlyNotes.ok)
             action = IntentActions.ADD_HABIT_STATUS.action
         }
         val donePendingBroadcast = PendingIntent.getBroadcast(

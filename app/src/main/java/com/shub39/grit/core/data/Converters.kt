@@ -17,6 +17,8 @@
 package com.shub39.grit.core.data
 
 import androidx.room3.TypeConverter
+import com.shub39.grit.core.habits.domain.HabitCompletion
+import com.shub39.grit.core.habits.domain.HabitType
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.datetime.DayOfWeek
@@ -63,4 +65,16 @@ object Converters {
     fun dayToTimestamp(date: LocalDate): Long {
         return date.toEpochDays()
     }
+
+    @TypeConverter
+    fun fromHabitCompletion(value: HabitCompletion): Int = value.ok
+
+    @TypeConverter
+    fun toHabitCompletion(value: Int): HabitCompletion = HabitCompletion.byValue(value)
+
+    @TypeConverter
+    fun fromHabitType(value: HabitType): String = value.id
+
+    @TypeConverter
+    fun toHabitType(value: String): HabitType = HabitType.byValue(value)
 }

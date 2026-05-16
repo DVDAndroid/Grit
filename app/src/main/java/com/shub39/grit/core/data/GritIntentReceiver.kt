@@ -24,7 +24,6 @@ import androidx.core.app.RemoteInput
 import com.shub39.grit.core.domain.AlarmScheduler
 import com.shub39.grit.core.domain.IntentActions
 import com.shub39.grit.core.domain.SettingsDatastore
-import com.shub39.grit.core.habits.domain.HabitCompleted
 import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
@@ -101,7 +100,7 @@ class GritIntentReceiver : BroadcastReceiver(), KoinComponent {
         if (habitId < 0) return
         val random = Random.nextFloat()
         val habitNumberValue = intent.getFloatExtra("habit_numbervalue", random).takeIf { it != random }
-        val completed = intent.getIntExtra("habit_ok", 8)
+        val completed = intent.getIntExtra("habit_ok", HabitCompletion.Completed.ok)
         val remoteInputResults = RemoteInput.getResultsFromIntent(intent)
         val notes = remoteInputResults?.getString("note_text_key")
         val habitRepo = get<HabitRepo>()
@@ -109,7 +108,7 @@ class GritIntentReceiver : BroadcastReceiver(), KoinComponent {
         habitRepo.insertHabitStatus(HabitStatus(
             habitId = habitId,
             date = LocalDate.now(),
-            ok = HabitCompletion(completed),
+            ok = HabitCompletion.byValue(completed),
             notes = notes,
             numberValue = habitNumberValue
         ))

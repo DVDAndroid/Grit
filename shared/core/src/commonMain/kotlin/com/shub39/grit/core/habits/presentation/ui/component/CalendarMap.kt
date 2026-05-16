@@ -18,7 +18,6 @@ package com.shub39.grit.core.habits.presentation.ui.component
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -50,9 +49,9 @@ import com.kizitonwose.calendar.core.minusYears
 import com.kizitonwose.calendar.core.now
 import com.kizitonwose.calendar.core.plusDays
 import com.shub39.grit.core.habits.domain.Habit
-import com.shub39.grit.core.habits.domain.HabitBoolean
-import com.shub39.grit.core.habits.domain.HabitCompleted
+import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitStatus
+import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.domain.StreakPosition
 import com.shub39.grit.core.habits.domain.calendarMapStreakShape
@@ -311,14 +310,14 @@ private fun Preview() {
                             days = DayOfWeek.entries.toSet(),
                             index = 1,
                             reminder = false,
-                            type = HabitBoolean,
+                            type = HabitType.Boolean,
                         ),
                     statuses =
                         (0..40).map {
                             HabitStatus(
                                 habitId = 1,
                                 date = LocalDate.now().minus(it, DateTimeUnit.DAY),
-                                ok = HabitCompleted,
+                                ok = HabitCompletion.Completed,
                                 notes = null,
                                 numberValue = null,
                             )

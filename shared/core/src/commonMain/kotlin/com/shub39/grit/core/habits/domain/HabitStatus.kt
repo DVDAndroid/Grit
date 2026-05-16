@@ -31,7 +31,7 @@ data class HabitStatus(
     val numberValue: Float?,
 ) {
 
-    fun isCompleted() = ok == HabitCompleted
+    fun isCompleted() = ok == HabitCompletion.Completed
 
     fun hasNotes() = notes?.isNotBlank() ?: false
 }

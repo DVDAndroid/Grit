@@ -1,11 +1,13 @@
 package com.shub39.grit.core.habits.domain
 
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmInline
 
-@JvmInline
 @Serializable
-value class HabitCompletion(val ok: Int)
+enum class HabitCompletion(val ok: Int) {
+    Completed(1),
+    OnlyNotes(0);
 
-val HabitCompleted = HabitCompletion(1)
-val HabitOnlyNotes = HabitCompletion(0)
+    companion object {
+        fun byValue(x: Int) = entries.single { it.ok == x }
+    }
+}

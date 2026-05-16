@@ -16,24 +16,19 @@
  */
 package com.shub39.grit.habits.data.repository
 
-import androidx.compose.runtime.Composable
-import com.shub39.grit.core.habits.domain.HabitCompleted
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.domain.WeekDayFrequencyData
 import com.shub39.grit.core.habits.domain.WeeklyComparisonData
-import com.shub39.grit.core.utils.localized
 import com.shub39.grit.core.utils.now
-import kotlin.time.ExperimentalTime
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
-import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import org.jetbrains.compose.resources.stringResource
+import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 fun countCurrentStreak(
