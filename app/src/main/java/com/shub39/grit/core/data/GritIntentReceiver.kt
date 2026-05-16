@@ -20,10 +20,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.core.app.RemoteInput
 import com.shub39.grit.core.domain.AlarmScheduler
 import com.shub39.grit.core.domain.IntentActions
 import com.shub39.grit.core.domain.SettingsDatastore
 import com.shub39.grit.core.habits.domain.HabitCompleted
+import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.tasks.domain.TaskRepo
@@ -99,10 +101,18 @@ class GritIntentReceiver : BroadcastReceiver(), KoinComponent {
         if (habitId < 0) return
         val random = Random.nextFloat()
         val habitNumberValue = intent.getFloatExtra("habit_numbervalue", random).takeIf { it != random }
-
+        val completed = intent.getIntExtra("habit_ok", 8)
+        val remoteInputResults = RemoteInput.getResultsFromIntent(intent)
+        val notes = remoteInputResults?.getString("note_text_key")
         val habitRepo = get<HabitRepo>()
 
-        habitRepo.insertHabitStatus(HabitStatus(habitId = habitId, date = LocalDate.now(), ok = HabitCompleted, notes = null, numberValue = habitNumberValue))
+        habitRepo.insertHabitStatus(HabitStatus(
+            habitId = habitId,
+            date = LocalDate.now(),
+            ok = HabitCompletion(completed),
+            notes = notes,
+            numberValue = habitNumberValue
+        ))
 
         Log.d(TAG, "Habit status added successfully")
 

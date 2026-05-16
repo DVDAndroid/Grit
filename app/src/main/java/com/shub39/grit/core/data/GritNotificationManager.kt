@@ -27,9 +27,12 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.RemoteInput
 import com.shub39.grit.R
 import com.shub39.grit.core.domain.IntentActions
 import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.habits.domain.HabitCompleted
+import com.shub39.grit.core.habits.domain.HabitOnlyNotes
 import com.shub39.grit.core.tasks.domain.Task
 import org.koin.core.annotation.Single
 
@@ -59,18 +62,50 @@ class GritNotificationManager(private val context: Context) {
     fun habitNotification(habit: Habit) {
         Log.d(TAG, "Sending Habit Notification")
 
-        val intent =
-            Intent(context, GritIntentReceiver::class.java).apply {
-                putExtra("habit_id", habit.id)
-                action = IntentActions.ADD_HABIT_STATUS.action
-            }
-        val pendingBroadcast =
+        val completedHabitIntent = Intent(context, GritIntentReceiver::class.java).apply {
+            putExtra("habit_id", habit.id)
+            putExtra("habit_ok", HabitCompleted.ok)
+            action = IntentActions.ADD_HABIT_STATUS.action
+        }
+        val onlyNoteHabitIntent = Intent(context, GritIntentReceiver::class.java).apply {
+            putExtra("habit_id", habit.id)
+            putExtra("habit_ok", HabitOnlyNotes.ok)
+            action = IntentActions.ADD_HABIT_STATUS.action
+        }
+        val donePendingBroadcast = PendingIntent.getBroadcast(
+            context,
+            habit.id.toInt() * 100 + 0,
+            completedHabitIntent,
+            PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        val doneWithNoteRemoteInput = RemoteInput.Builder("note_text_key")
+            .setLabel("Done with note")
+            .build()
+        val doneWithNoteAction = NotificationCompat.Action.Builder(
+            R.drawable.notif_icon,
+            "Done with note",
             PendingIntent.getBroadcast(
                 context,
-                habit.id.toInt(),
-                intent,
-                PendingIntent.FLAG_IMMUTABLE,
+                habit.id.toInt() * 100 + 1,
+                completedHabitIntent,
+                PendingIntent.FLAG_MUTABLE,
             )
+        ).addRemoteInput(doneWithNoteRemoteInput).build()
+
+        val noteRemoteInput = RemoteInput.Builder("note_text_key")
+            .setLabel("Note")
+            .build()
+        val noteAction = NotificationCompat.Action.Builder(
+            R.drawable.notif_icon,
+            "Note",
+            PendingIntent.getBroadcast(
+                context,
+                habit.id.toInt() * 100 + 2,
+                onlyNoteHabitIntent,
+                PendingIntent.FLAG_MUTABLE,
+            )
+        ).addRemoteInput(noteRemoteInput).build()
 
         val builder =
             NotificationCompat.Builder(context, "1")
@@ -79,7 +114,9 @@ class GritNotificationManager(private val context: Context) {
                 .setContentText(habit.description)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
-                .addAction(R.drawable.notif_icon, "Mark Done", pendingBroadcast)
+                .addAction(R.drawable.notif_icon, "Done", donePendingBroadcast)
+                .addAction(doneWithNoteAction)
+                .addAction(noteAction)
 
         if (
             ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
@@ -115,7 +152,7 @@ class GritNotificationManager(private val context: Context) {
 
         if (
             ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
-                PackageManager.PERMISSION_GRANTED
+            PackageManager.PERMISSION_GRANTED
         ) {
             notificationManager.notify(task.id.toInt() + TASK_NOTIF_ID_OFFSET, builder.build())
         } else {
