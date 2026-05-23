@@ -367,6 +367,7 @@ fun AnalyticsPage(
                         HabitsAction.SaveNotesDialog(
                             habit = state.notesDialog.habit,
                             date = state.notesDialog.date,
+                            numberValue = state.notesDialog.numberValue,
                             notes = inputText,
                         )
                     )

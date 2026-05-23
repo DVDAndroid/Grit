@@ -52,8 +52,8 @@ data class HabitState(
     val analyticsHabitId: Long? = null,
     val showHabitAddSheet: Boolean = false,
     val editState: Boolean = false,
-    val notesDialog: HabitDialogNoteInfo? = null,
-    val inputNumberDialog: HabitDialogNumber? = null,
+    val notesDialog: HabitDialogStatusInfo? = null,
+    val inputNumberDialog: HabitDialogStatusInfo? = null,
 
     // datastore
     val compactHabitView: Boolean = false,
@@ -62,14 +62,7 @@ data class HabitState(
 )
 
 @Stable
-data class HabitDialogNoteInfo(
-    val habit: Habit,
-    val date: LocalDate,
-    val notes: String,
-)
-
-@Stable
-data class HabitDialogNumber(
+data class HabitDialogStatusInfo(
     val habit: Habit,
     val date: LocalDate,
     val numberValue: Float,

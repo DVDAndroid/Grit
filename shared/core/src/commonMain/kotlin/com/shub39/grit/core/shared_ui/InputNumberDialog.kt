@@ -1,7 +1,6 @@
 package com.shub39.grit.core.shared_ui
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,24 +9,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonShapes
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.ScrollField
 import androidx.compose.material3.ScrollFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberScrollFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,15 +38,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.shub39.grit.core.habits.presentation.HabitDialogNumber
+import com.shub39.grit.core.habits.presentation.HabitDialogStatusInfo
 import com.shub39.grit.core.habits.presentation.HabitsAction
 import grit.shared.core.generated.resources.Res
-import grit.shared.core.generated.resources.add_habit
-import grit.shared.core.generated.resources.backspace
 import grit.shared.core.generated.resources.delete
 import grit.shared.core.generated.resources.delete_numbervalue
 import grit.shared.core.generated.resources.keyboard
-import grit.shared.core.generated.resources.save
 import grit.shared.core.generated.resources.swipe_vertical
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -64,7 +55,7 @@ private const val NUMBER_TOTAL = 1001
 
 @Composable
 fun InputNumberDialog(
-    state: HabitDialogNumber,
+    state: HabitDialogStatusInfo,
     onAction: (HabitsAction) -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }

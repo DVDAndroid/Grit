@@ -24,8 +24,7 @@ import com.shub39.grit.core.habits.domain.Habit
 import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
-import com.shub39.grit.core.habits.presentation.HabitDialogNoteInfo
-import com.shub39.grit.core.habits.presentation.HabitDialogNumber
+import com.shub39.grit.core.habits.presentation.HabitDialogStatusInfo
 import com.shub39.grit.core.habits.presentation.HabitState
 import com.shub39.grit.core.habits.presentation.HabitsAction
 import kotlin.time.ExperimentalTime
@@ -124,18 +123,23 @@ class HabitViewModel(
 
                 is HabitsAction.ShowNotesDialog -> {
                     _state.update {
+                        val status = repo.getStatusByHabitAndDate(
+                            action.habit.id,
+                            action.date
+                        )
                         it.copy(
-                            notesDialog = HabitDialogNoteInfo(
+                            notesDialog = HabitDialogStatusInfo(
                                 habit = action.habit,
                                 date = action.date,
-                                notes = repo.getStatusByHabitAndDate(action.habit.id, action.date)?.notes.orEmpty(),
+                                numberValue = status?.numberValue ?: 0f,
+                                notes = status?.notes.orEmpty(),
                             )
                         )
                     }
                 }
 
                 is HabitsAction.SaveNotesDialog -> {
-                    upsertHabitStatus(action.habit, action.date, numberValue = null, action.notes) // fixme:
+                    upsertHabitStatus(action.habit, action.date, action.numberValue, action.notes)
                     _state.update { it.copy(notesDialog = null) }
                 }
 
@@ -150,7 +154,7 @@ class HabitViewModel(
                             action.date
                         )
                         it.copy(
-                            inputNumberDialog = HabitDialogNumber(
+                            inputNumberDialog = HabitDialogStatusInfo(
                                 habit = action.habit,
                                 date = action.date,
                                 numberValue = status?.numberValue ?: 0f,
