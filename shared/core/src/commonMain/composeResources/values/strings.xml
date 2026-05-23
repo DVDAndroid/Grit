@@ -92,4 +92,8 @@
     <string name="friday">Friday</string>
     <string name="saturday">Saturday</string>
     <string name="sunday">Sunday</string>
+    <string name="habit_type">Habit type</string>
+    <string name="habit_type_yesno">Yes/no</string>
+    <string name="habit_type_numeric">Numeric</string>
+    <string name="delete_numbervalue">Delete number</string>
 </resources>

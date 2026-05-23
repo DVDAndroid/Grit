@@ -65,6 +65,7 @@ import com.kizitonwose.calendar.compose.heatmapcalendar.rememberHeatMapCalendarS
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.minusMonths
 import com.kizitonwose.calendar.core.now
+import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.presentation.HabitState
 import com.shub39.grit.core.habits.presentation.HabitsAction
 import com.shub39.grit.core.habits.presentation.ui.component.CalendarMap
@@ -217,42 +218,48 @@ fun AnalyticsPage(
                 }
             }
 
-            item {
-                Column(
-                    modifier = Modifier.fillMaxWidth().widthIn(max = maxWidth),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    WeeklyBooleanHeatMap(
-                        heatMapState = heatMapState,
-                        onAction = onAction,
-                        habit = currentHabit.habit,
-                        statuses = currentHabit.statuses,
-                    )
-                    CalendarMap(
-                        canSeeContent = isUserSubscribed,
-                        onAction = onAction,
-                        calendarState = calendarState,
-                        currentHabit = currentHabit,
-                        primary = primary,
-                        onNavigateToPaywall = onNavigateToPaywall,
+            if (currentHabit.habit.type == HabitType.Boolean) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().widthIn(max = maxWidth),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        WeeklyBooleanHeatMap(
+                            heatMapState = heatMapState,
+                            onAction = onAction,
+                            habit = currentHabit.habit,
+                            statuses = currentHabit.statuses,
+                        )
+                        CalendarMap(
+                            canSeeContent = isUserSubscribed,
+                            onAction = onAction,
+                            calendarState = calendarState,
+                            currentHabit = currentHabit,
+                            primary = primary,
+                            onNavigateToPaywall = onNavigateToPaywall,
+                        )
+                    }
+                }
+
+                item {
+                    WeeklyActivity(
+                        lineChartData = currentHabit.weeklyComparisonData,
+                        modifier = Modifier.widthIn(max = maxWidth),
                     )
                 }
-            }
 
-            item {
-                WeeklyActivity(
-                    lineChartData = currentHabit.weeklyComparisonData,
-                    modifier = Modifier.widthIn(max = maxWidth),
-                )
-            }
-
-            item {
-                WeekDayBreakdown(
-                    canSeeContent = isUserSubscribed,
-                    weekDayData = currentHabit.weekDayFrequencyData,
-                    onNavigateToPaywall = onNavigateToPaywall,
-                    modifier = Modifier.widthIn(max = maxWidth),
-                )
+                item {
+                    WeekDayBreakdown(
+                        canSeeContent = isUserSubscribed,
+                        weekDayData = currentHabit.weekDayFrequencyData,
+                        onNavigateToPaywall = onNavigateToPaywall,
+                        modifier = Modifier.widthIn(max = maxWidth),
+                    )
+                }
+            } else {
+                item {
+                    Text("numeric")
+                }
             }
         }
     }

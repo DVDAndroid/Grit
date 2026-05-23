@@ -29,6 +29,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -46,6 +48,7 @@ import com.shub39.grit.core.habits.presentation.HabitsAction
 import com.shub39.grit.core.habits.presentation.ui.component.HabitCard
 import com.shub39.grit.core.habits.presentation.ui.component.HabitUpsertSheet
 import com.shub39.grit.core.shared_ui.Empty
+import com.shub39.grit.core.shared_ui.InputNumberDialog
 import com.shub39.grit.core.shared_ui.detachedItemShape
 import com.shub39.grit.core.shared_ui.endItemShape
 import com.shub39.grit.core.shared_ui.leadingItemShape
@@ -83,18 +86,19 @@ fun HabitsList(
             modifier = Modifier.fillMaxHeight(),
         ) {
             // habits
-            itemsIndexed(state.habitsWithAnalytics, key = { _, it -> it.habit.id }) {
-                index,
-                habitWithAnalytics ->
+            itemsIndexed(state.habitsWithAnalytics, key = { _, it -> it.habit.id }) { index,
+                                                                                      habitWithAnalytics ->
                 ReorderableItem(reorderableListState, key = habitWithAnalytics.habit.id) {
                     val completed = state.completedHabitIds.contains(habitWithAnalytics.habit.id)
                     val shape =
                         when {
                             state.habitsWithAnalytics.size == 1 || !completed ->
                                 detachedItemShape(radius = 28)
+
                             index == 0 -> leadingItemShape(topRadius = 28, bottomRadius = 8)
                             index == state.habitsWithAnalytics.size - 1 ->
                                 endItemShape(bottomRadius = 28, topRadius = 8)
+
                             else -> middleItemShape(radius = 8)
                         }
 
@@ -120,7 +124,7 @@ fun HabitsList(
                         compactView = state.compactHabitView,
                         analyticsEnabled =
                             state.analyticsHabitId != habitWithAnalytics.habit.id ||
-                                windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded,
+                                    windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded,
                     )
                 }
             }
@@ -163,7 +167,8 @@ fun HabitsList(
             title = { Text("Enter day notes") },
             text = {
                 Column {
-                    TextField(
+                    OutlinedTextField(
+                        shape = MaterialTheme.shapes.medium,
                         value = inputText,
                         onValueChange = { inputText = it },
                         placeholder = { Text("Notes") },
@@ -199,6 +204,13 @@ fun HabitsList(
                     Text("Cancel")
                 }
             }
+        )
+    }
+
+    if (state.inputNumberDialog != null) {
+        InputNumberDialog(
+            state = state.inputNumberDialog,
+            onAction = onAction,
         )
     }
 }

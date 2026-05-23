@@ -90,4 +90,8 @@
     <string name="friday">Venerdì</string>
     <string name="saturday">Sabato</string>
     <string name="sunday">Domenica</string>
+    <string name="habit_type">Tipo di abitudine</string>
+    <string name="habit_type_yesno">Si/no</string>
+    <string name="habit_type_numeric">Numerica</string>
+    <string name="delete_numbervalue">Cancella numero</string>
 </resources>

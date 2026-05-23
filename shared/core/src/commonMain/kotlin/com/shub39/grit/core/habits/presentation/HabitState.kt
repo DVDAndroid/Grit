@@ -53,6 +53,7 @@ data class HabitState(
     val showHabitAddSheet: Boolean = false,
     val editState: Boolean = false,
     val notesDialog: HabitDialogNoteInfo? = null,
+    val inputNumberDialog: HabitDialogNumber? = null,
 
     // datastore
     val compactHabitView: Boolean = false,
@@ -64,5 +65,13 @@ data class HabitState(
 data class HabitDialogNoteInfo(
     val habit: Habit,
     val date: LocalDate,
+    val notes: String,
+)
+
+@Stable
+data class HabitDialogNumber(
+    val habit: Habit,
+    val date: LocalDate,
+    val numberValue: Float,
     val notes: String,
 )

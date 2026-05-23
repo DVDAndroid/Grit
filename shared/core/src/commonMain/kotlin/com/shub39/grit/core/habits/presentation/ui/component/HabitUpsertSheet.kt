@@ -19,7 +19,6 @@ package com.shub39.grit.core.habits.presentation.ui.component
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -95,16 +94,20 @@ import grit.shared.core.generated.resources.alarm
 import grit.shared.core.generated.resources.description
 import grit.shared.core.generated.resources.edit
 import grit.shared.core.generated.resources.edit_habit
+import grit.shared.core.generated.resources.habit_type
+import grit.shared.core.generated.resources.habit_type_numeric
+import grit.shared.core.generated.resources.habit_type_yesno
+import grit.shared.core.generated.resources.pin
 import grit.shared.core.generated.resources.save
 import grit.shared.core.generated.resources.select_days
 import grit.shared.core.generated.resources.started_on
 import grit.shared.core.generated.resources.title
+import grit.shared.core.generated.resources.toggle_on
 import grit.shared.core.generated.resources.too_long
 import grit.shared.core.generated.resources.update_description
 import grit.shared.core.generated.resources.update_title
 import kotlinx.coroutines.delay
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
@@ -260,6 +263,75 @@ fun HabitUpsertSheetContent(
             item {
                 Spacer(modifier = Modifier.height(4.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    if (!isEditSheet) {
+                        Column {
+                            Card(
+                                shape = leadingItemShape(),
+                                modifier = Modifier.animateContentSize(),
+                                colors =
+                                    CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                    ),
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.habit_type),
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxWidth(),
+                                )
+                            }
+
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier =
+                                    Modifier.fillParentMaxWidth()
+                                        .clip(endItemShape(topRadius = 0))
+                                        .background(listItemColors().containerColor)
+                                        .padding(start = 32.dp, end = 32.dp, bottom = 8.dp),
+                            ) {
+                                ToggleButton(
+                                    checked = newHabit.type == HabitType.Boolean,
+                                    onCheckedChange = {
+                                        updateHabit(newHabit.copy(type = HabitType.Boolean))
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors =
+                                        ToggleButtonDefaults.toggleButtonColors(
+                                            containerColor =
+                                                MaterialTheme.colorScheme.surfaceContainerLow
+                                        ),
+                                ) {
+                                    Icon(
+                                        imageVector = vectorResource(Res.drawable.toggle_on),
+                                        contentDescription = null,
+                                    )
+
+                                    Text(text = stringResource(Res.string.habit_type_yesno))
+                                }
+
+                                ToggleButton(
+                                    checked = newHabit.type == HabitType.Numeric,
+                                    onCheckedChange = {
+                                        updateHabit(newHabit.copy(type = HabitType.Numeric))
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors =
+                                        ToggleButtonDefaults.toggleButtonColors(
+                                            containerColor =
+                                                MaterialTheme.colorScheme.surfaceContainerLow
+                                        ),
+                                ) {
+                                    Icon(
+                                        imageVector = vectorResource(Res.drawable.pin),
+                                        contentDescription = null,
+                                    )
+
+                                    Text(text = stringResource(Res.string.habit_type_numeric))
+                                }
+                            }
+                        }
+                    }
+
                     Column {
                         Card(
                             shape = leadingItemShape(bottomRadius = 0),
@@ -272,14 +344,14 @@ fun HabitUpsertSheetContent(
                             Text(
                                 text = stringResource(Res.string.started_on),
                                 modifier = Modifier
-                                    .padding(16.dp)
+                                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                                     .fillMaxWidth(),
                             )
                         }
                         ListItem(
                             colors = listItemColors(),
                             modifier = Modifier
-                                .clip(middleItemShape()),
+                                .clip(endItemShape(topRadius = 0)),
                             headlineContent = {
                                 Text(
                                     text = formatDateWithOrdinal(newHabit.time.date),

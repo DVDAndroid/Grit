@@ -25,6 +25,7 @@ import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.presentation.HabitDialogNoteInfo
+import com.shub39.grit.core.habits.presentation.HabitDialogNumber
 import com.shub39.grit.core.habits.presentation.HabitState
 import com.shub39.grit.core.habits.presentation.HabitsAction
 import kotlin.time.ExperimentalTime
@@ -74,7 +75,7 @@ class HabitViewModel(
 
                 is HabitsAction.DeleteHabit -> deleteHabit(action.habit)
 
-                is HabitsAction.InsertStatus -> upsertHabitStatus(action.habit, action.date, null)
+                is HabitsAction.InsertStatus -> upsertHabitStatus(action.habit, action.date, numberValue = null, notes = null)
 
                 is HabitsAction.UpdateHabit -> upsertHabit(action.habit)
 
@@ -134,12 +135,38 @@ class HabitViewModel(
                 }
 
                 is HabitsAction.SaveNotesDialog -> {
-                    upsertHabitStatus(action.habit, action.date, action.notes)
+                    upsertHabitStatus(action.habit, action.date, numberValue = null, action.notes) // fixme:
                     _state.update { it.copy(notesDialog = null) }
                 }
 
                 HabitsAction.CloseNotesDialog -> {
                     _state.update { it.copy(notesDialog = null) }
+                }
+
+                is HabitsAction.ShowNumberInputDialog -> {
+                    _state.update {
+                        val status = repo.getStatusByHabitAndDate(
+                            action.habit.id,
+                            action.date
+                        )
+                        it.copy(
+                            inputNumberDialog = HabitDialogNumber(
+                                habit = action.habit,
+                                date = action.date,
+                                numberValue = status?.numberValue ?: 0f,
+                                notes = status?.notes.orEmpty(),
+                            )
+                        )
+                    }
+                }
+
+                is HabitsAction.SaveNumberInputDialog -> {
+                    upsertHabitStatus(action.habit, action.date, action.numberValue, action.notes)
+                    _state.update { it.copy(inputNumberDialog = null) }
+                }
+
+                HabitsAction.CloseNumberInputDialog ->  {
+                    _state.update { it.copy(inputNumberDialog = null) }
                 }
             }
         }
@@ -210,7 +237,7 @@ class HabitViewModel(
         scheduler.cancel(habit)
     }
 
-    private suspend fun upsertHabitStatus(habit: Habit, date: LocalDate, notes: String?) {
+    private suspend fun upsertHabitStatus(habit: Habit, date: LocalDate, numberValue: Float?, notes: String?) {
         val existing = _state.value.habitsWithAnalytics
             .find { it.habit == habit }
             ?.statuses

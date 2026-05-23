@@ -57,8 +57,10 @@ import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 import com.kizitonwose.calendar.core.minusDays
 import com.kizitonwose.calendar.core.plusDays
+import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.presentation.HabitsAction
+import com.shub39.grit.core.habits.presentation.HabitsAction.*
 import com.shub39.grit.core.utils.localized
 import com.shub39.grit.core.utils.now
 import com.shub39.grit.core.utils.toFormattedString
@@ -130,6 +132,13 @@ fun HabitCard(
             firstDayOfWeek = startingDay,
         )
 
+    val completeAction = { d: LocalDate->
+        when (habitWithAnalytics.habit.type) {
+            HabitType.Boolean -> action(InsertStatus(habitWithAnalytics.habit, d))
+            HabitType.Numeric -> action(ShowNumberInputDialog(habitWithAnalytics.habit, d))
+        }
+    }
+
     Card(
         colors =
             CardDefaults.outlinedCardColors(
@@ -137,9 +146,7 @@ fun HabitCard(
                 contentColor = cardContent,
             ),
         onClick = {
-            if (canCompleteToday) {
-                action(HabitsAction.InsertStatus(habitWithAnalytics.habit, today))
-            }
+            if (canCompleteToday) completeAction(today)
         },
         shape = shape,
         modifier =
@@ -295,12 +302,7 @@ fun HabitCard(
                                     role = Role.Button,
                                     enabled = validDay,
                                     onClick = {
-                                        action(
-                                            HabitsAction.InsertStatus(
-                                                habit = habitWithAnalytics.habit,
-                                                date = weekDay.date,
-                                            )
-                                        )
+                                        completeAction(weekDay.date)
                                     },
                                     onLongClick = {
                                         action(
