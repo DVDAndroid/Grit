@@ -484,86 +484,89 @@ fun HabitUpsertSheetContent(
                     }
                 }
             }
+
+            item {
+                Button(
+                    onClick = {
+                        onUpsertHabit(
+                            newHabit.copy(
+                                title = titleTextFieldState.text.toString(),
+                                description = descTextFieldState.text.toString(),
+                            )
+                        )
+                        onDismissRequest()
+                    },
+                    modifier = Modifier.padding(bottom = 32.dp).fillMaxWidth(),
+                    enabled =
+                        descTextFieldState.text.length <= 50 &&
+                                titleTextFieldState.text.length <= 20 &&
+                                titleTextFieldState.text.isNotBlank(),
+                ) {
+                    Text(text = stringResource(if (isEditSheet) Res.string.save else Res.string.add_habit))
+                }
+            }
         }
 
-        Button(
-            onClick = {
-                onUpsertHabit(
+    }
+
+    if (timePickerDialog) {
+        val timePickerState =
+            rememberTimePickerState(
+                initialHour = newHabit.time.hour,
+                initialMinute = newHabit.time.minute,
+                is24Hour = is24Hr,
+            )
+
+        GritTimePicker(
+            onDismissRequest = { timePickerDialog = false },
+            state = timePickerState,
+            onConfirm = {
+                updateHabit(
                     newHabit.copy(
-                        title = titleTextFieldState.text.toString(),
-                        description = descTextFieldState.text.toString(),
+                        time =
+                            LocalDateTime(
+                                date = newHabit.time.date,
+                                time =
+                                    LocalTime(
+                                        minute = timePickerState.minute,
+                                        hour = timePickerState.hour,
+                                    ),
+                            )
                     )
                 )
-                onDismissRequest()
+                timePickerDialog = false
             },
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp).fillMaxWidth(),
-            enabled =
-                descTextFieldState.text.length <= 50 &&
-                    titleTextFieldState.text.length <= 20 &&
-                    titleTextFieldState.text.isNotBlank(),
-        ) {
-            Text(text = stringResource(if (isEditSheet) Res.string.save else Res.string.add_habit))
-        }
+        )
+    }
 
-        if (timePickerDialog) {
-            val timePickerState =
-                rememberTimePickerState(
-                    initialHour = newHabit.time.hour,
-                    initialMinute = newHabit.time.minute,
-                    is24Hour = is24Hr,
+    if (datePickerDialog) {
+        val datePickerState = rememberDatePickerState(
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    return Clock.System.now().toEpochMilliseconds() > utcTimeMillis
+                }
+            },
+        )
+
+        GritDatePicker(
+            onDismissRequest = { datePickerDialog = false },
+            state = datePickerState,
+            onConfirm = {
+                val newDate = Instant.fromEpochMilliseconds(
+                    datePickerState.selectedDateMillis ?: Clock.System.now().toEpochMilliseconds()
+                ).toLocalDateTime(TimeZone.currentSystemDefault()).date
+                updateHabit(
+                    newHabit.copy(
+                        time =
+                            LocalDateTime(
+                                date = newDate,
+                                time = newHabit.time.time,
+                            )
+                    )
                 )
-
-            GritTimePicker(
-                onDismissRequest = { timePickerDialog = false },
-                state = timePickerState,
-                onConfirm = {
-                    updateHabit(
-                        newHabit.copy(
-                            time =
-                                LocalDateTime(
-                                    date = newHabit.time.date,
-                                    time =
-                                        LocalTime(
-                                            minute = timePickerState.minute,
-                                            hour = timePickerState.hour,
-                                        ),
-                                )
-                        )
-                    )
-                    timePickerDialog = false
-                },
-            )
-        }
-
-        if (datePickerDialog) {
-            val datePickerState = rememberDatePickerState(
-                selectableDates = object : SelectableDates {
-                    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                        return Clock.System.now().toEpochMilliseconds() > utcTimeMillis
-                    }
-                },
-            )
-
-            GritDatePicker(
-                onDismissRequest = { datePickerDialog = false },
-                state = datePickerState,
-                onConfirm = {
-                    val newDate = Instant.fromEpochMilliseconds(
-                        datePickerState.selectedDateMillis ?: Clock.System.now().toEpochMilliseconds()
-                    ).toLocalDateTime(TimeZone.currentSystemDefault()).date
-                    updateHabit(
-                        newHabit.copy(
-                            time =
-                                LocalDateTime(
-                                    date = newDate,
-                                    time = newHabit.time.time,
-                                )
-                        )
-                    )
-                    datePickerDialog = false
-                },
-            )
-        }
+                datePickerDialog = false
+            },
+        )
     }
 }
 

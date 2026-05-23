@@ -127,7 +127,7 @@ class HabitRepository(
     override fun getCompletedHabitIds(): Flow<List<Long>> {
         return habitStatuses
             .map { habitStatuses ->
-                habitStatuses.filter { it.date == LocalDate.now() }.map { it.habitId }
+                habitStatuses.filter { it.date == LocalDate.now() && it.isCompleted() }.map { it.habitId }
             }
             .flowOn(Dispatchers.Default)
     }

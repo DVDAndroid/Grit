@@ -46,7 +46,7 @@ fun GritBottomSheet(
         sheetState = sheetState,
     ) {
         Column(
-            modifier = Modifier.padding(padding).animateContentSize().fillMaxWidth(),
+            modifier = Modifier.padding(padding).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp),
             content = content,
