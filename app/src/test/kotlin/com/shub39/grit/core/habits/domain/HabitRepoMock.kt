@@ -50,12 +50,6 @@ class HabitRepoMock : HabitRepo {
         date: LocalDate
     ): HabitStatus? = statusHabitList[habitId]?.find { it.date == date }
 
-    override suspend fun insertHabitStatus(habitStatus: HabitStatus) {
-        val l = statusHabitList[habitStatus.habitId]
-        if (l == null) statusHabitList[habitStatus.habitId] = mutableListOf()
-        statusHabitList[habitStatus.habitId]?.add(habitStatus)
-    }
-
     override suspend fun upsertHabitStatus(habitStatus: HabitStatus) {
         val l = statusHabitList[habitStatus.habitId]
         if (l == null) statusHabitList[habitStatus.habitId] = mutableListOf()

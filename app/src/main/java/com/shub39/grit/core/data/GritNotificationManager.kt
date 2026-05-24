@@ -32,6 +32,7 @@ import com.shub39.grit.R
 import com.shub39.grit.core.domain.IntentActions
 import com.shub39.grit.core.habits.domain.Habit
 import com.shub39.grit.core.habits.domain.HabitCompletion
+import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.tasks.domain.Task
 import org.koin.core.annotation.Single
 
@@ -61,6 +62,33 @@ class GritNotificationManager(private val context: Context) {
     fun habitNotification(habit: Habit) {
         Log.d(TAG, "Sending Habit Notification")
 
+        val builder =
+            NotificationCompat.Builder(context, "1")
+                .setSmallIcon(R.drawable.notif_icon)
+                .setContentTitle(habit.title)
+                .setContentText(habit.description)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .apply {
+                    if (habit.type == HabitType.Boolean) {
+                        booleanHabitNotificationActions(habit).forEach { addAction(it) }
+                    } else {
+                        numericHabitNotificationActions(habit).forEach { addAction(it) }
+                    }
+                }
+
+        if (
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationManager.notify(habit.id.toInt() + HABIT_NOTIF_ID_OFFSET, builder.build())
+        } else {
+            Log.e(TAG, "Notification permission denied!")
+        }
+    }
+
+    // "Done", "Done with note", "Note"
+    private fun booleanHabitNotificationActions(habit: Habit): List<NotificationCompat.Action> {
         val completedHabitIntent = Intent(context, GritIntentReceiver::class.java).apply {
             putExtra("habit_id", habit.id)
             putExtra("habit_ok", HabitCompletion.Completed.ok)
@@ -106,25 +134,58 @@ class GritNotificationManager(private val context: Context) {
             )
         ).addRemoteInput(noteRemoteInput).build()
 
-        val builder =
-            NotificationCompat.Builder(context, "1")
-                .setSmallIcon(R.drawable.notif_icon)
-                .setContentTitle(habit.title)
-                .setContentText(habit.description)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true)
-                .addAction(R.drawable.notif_icon, "Done", donePendingBroadcast)
-                .addAction(doneWithNoteAction)
-                .addAction(noteAction)
+        return listOf(
+            NotificationCompat.Action(R.drawable.notif_icon, "Done", donePendingBroadcast),
+            doneWithNoteAction,
+            noteAction,
+        )
+    }
 
-        if (
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
-                PackageManager.PERMISSION_GRANTED
-        ) {
-            notificationManager.notify(habit.id.toInt() + HABIT_NOTIF_ID_OFFSET, builder.build())
-        } else {
-            Log.e(TAG, "Notification permission denied!")
+    // "Done...", "Note"
+    private fun numericHabitNotificationActions(habit: Habit): List<NotificationCompat.Action> {
+        val completedHabitIntent = Intent(context, GritIntentReceiver::class.java).apply {
+            putExtra("habit_id", habit.id)
+            putExtra("habit_ok", HabitCompletion.Completed.ok)
+            action = IntentActions.ADD_HABIT_STATUS.action
         }
+        val onlyNoteHabitIntent = Intent(context, GritIntentReceiver::class.java).apply {
+            putExtra("habit_id", habit.id)
+            putExtra("habit_ok", HabitCompletion.OnlyNotes.ok)
+            action = IntentActions.ADD_HABIT_STATUS.action
+        }
+
+        val numericValueRemoteInput = RemoteInput.Builder("habit_numbervalue")
+            .setLabel("Done...")
+            .build()
+        val numericNoteAction = NotificationCompat.Action.Builder(
+            R.drawable.notif_icon,
+            "Done...",
+            PendingIntent.getBroadcast(
+                context,
+                habit.id.toInt() * 100 + 1,
+                completedHabitIntent,
+                PendingIntent.FLAG_MUTABLE,
+            )
+        ).addRemoteInput(numericValueRemoteInput).build()
+
+        val noteRemoteInput = RemoteInput.Builder("note_text_key")
+            .setLabel("Note")
+            .build()
+        val noteAction = NotificationCompat.Action.Builder(
+            R.drawable.notif_icon,
+            "Note",
+            PendingIntent.getBroadcast(
+                context,
+                habit.id.toInt() * 100 + 2,
+                onlyNoteHabitIntent,
+                PendingIntent.FLAG_MUTABLE,
+            )
+        ).addRemoteInput(noteRemoteInput).build()
+
+        return listOf(
+            numericNoteAction,
+            noteAction,
+        )
     }
 
     // show task notification if permission granted

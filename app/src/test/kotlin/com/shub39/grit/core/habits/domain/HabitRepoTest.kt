@@ -43,7 +43,7 @@ class HabitRepoTest {
                 notes = null,
                 numberValue = null,
             )
-            repo.insertHabitStatus(habitStatus)
+            repo.upsertHabitStatus(habitStatus)
             assert(repo.getStatusForHabit(1).singleOrNull() == habitStatus)
 
             assert(repo.getStatusForHabit(1).singleOrNull()?.notes == null)

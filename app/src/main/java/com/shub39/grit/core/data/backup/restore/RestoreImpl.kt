@@ -33,8 +33,6 @@ import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.tasks.domain.TaskRepo
 import com.shub39.grit.habits.data.database.HabitDatabase
 import com.shub39.grit.tasks.data.database.TaskDatabase
-import kotlin.io.path.outputStream
-import kotlin.io.path.readText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -42,6 +40,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
+import kotlin.io.path.outputStream
+import kotlin.io.path.readText
 
 @Single(binds = [RestoreRepo::class])
 class RestoreImpl(
@@ -84,7 +84,7 @@ class RestoreImpl(
 
                         jsonDeserialized.habitStatus
                             .map { it.toHabitStatus() }
-                            .forEach { habitRepo.insertHabitStatus(it) }
+                            .forEach { habitRepo.upsertHabitStatus(it) }
                     },
                     async {
                         jsonDeserialized.categories

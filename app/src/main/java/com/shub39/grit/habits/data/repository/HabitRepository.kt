@@ -166,14 +166,6 @@ class HabitRepository(
         return habitStatusDao.getStatusByIdForHabit(habitId, date)?.toHabitStatus()
     }
 
-    override suspend fun insertHabitStatus(habitStatus: HabitStatus) {
-        habitStatusDao.insertHabitStatus(habitStatus.toHabitStatusEntity())
-
-        if (habitStatus.date == LocalDate.now()) {
-            notificationManager.cancelNotification(habitId = habitStatus.habitId.toInt())
-        }
-    }
-
     override suspend fun upsertHabitStatus(habitStatus: HabitStatus) {
         habitStatusDao.upsertHabitStatus(habitStatus.toHabitStatusEntity())
     }

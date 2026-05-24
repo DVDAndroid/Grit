@@ -27,18 +27,19 @@ import com.shub39.grit.core.domain.SettingsDatastore
 import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
+import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.tasks.domain.TaskRepo
 import com.shub39.grit.core.utils.now
-import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
-import kotlin.random.Random
+import kotlin.time.ExperimentalTime
 
 class GritIntentReceiver : BroadcastReceiver(), KoinComponent {
 
@@ -98,19 +99,34 @@ class GritIntentReceiver : BroadcastReceiver(), KoinComponent {
         Log.d(TAG, "Add habit status intent received")
         val habitId = intent.getLongExtra("habit_id", -1)
         if (habitId < 0) return
-        val random = Random.nextFloat()
-        val habitNumberValue = intent.getFloatExtra("habit_numbervalue", random).takeIf { it != random }
+        val habitRepo = get<HabitRepo>()
+        val habit = habitRepo.getHabitById(habitId) ?: return
+
         val completed = intent.getIntExtra("habit_ok", HabitCompletion.Completed.ok)
         val remoteInputResults = RemoteInput.getResultsFromIntent(intent)
         val notes = remoteInputResults?.getString("note_text_key")
-        val habitRepo = get<HabitRepo>()
 
-        habitRepo.insertHabitStatus(HabitStatus(
+        var habitNumberValue: Float? = null
+        if (habit.type == HabitType.Numeric) {
+            habitNumberValue = remoteInputResults
+                ?.getString("habit_numbervalue")
+                ?.toFloatOrNull()
+            if (habitNumberValue == null) {
+                get<GritNotificationManager>().apply {
+                    cancelNotification(habitId.toInt())
+                    delay(250)
+                    habitNotification(habit)
+                }
+                return
+            }
+        }
+
+        habitRepo.upsertHabitStatus(HabitStatus(
             habitId = habitId,
             date = LocalDate.now(),
             ok = HabitCompletion.byValue(completed),
             notes = notes,
-            numberValue = habitNumberValue
+            numberValue = habitNumberValue,
         ))
 
         Log.d(TAG, "Habit status added successfully")
