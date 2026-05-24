@@ -65,6 +65,6 @@ data class HabitState(
 data class HabitDialogStatusInfo(
     val habit: Habit,
     val date: LocalDate,
-    val numberValue: Float,
+    val numberValue: Float?,
     val notes: String,
 )

@@ -23,21 +23,23 @@ import com.shub39.grit.core.data.toHabitStatus
 import com.shub39.grit.core.data.toHabitStatusEntity
 import com.shub39.grit.core.domain.SettingsDatastore
 import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.domain.OverallAnalytics
+import com.shub39.grit.core.habits.presentation.StatusHabitAction
+import com.shub39.grit.core.habits.presentation.StatusHabitAction.SaveNoteDialog
+import com.shub39.grit.core.habits.presentation.StatusHabitAction.SaveNumberDialog
+import com.shub39.grit.core.habits.presentation.StatusHabitAction.ToggleBooleanStatus
 import com.shub39.grit.core.utils.now
 import com.shub39.grit.habits.data.database.HabitStatusDao
-import com.shub39.grit.habits.data.database.HabitStatusEntity
 import com.shub39.grit.habits.data.database.HabitsDao
-import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -48,6 +50,7 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 import org.koin.core.annotation.Single
+import kotlin.time.ExperimentalTime
 
 @Single(binds = [HabitRepo::class])
 @OptIn(ExperimentalTime::class)
@@ -127,7 +130,8 @@ class HabitRepository(
     override fun getCompletedHabitIds(): Flow<List<Long>> {
         return habitStatuses
             .map { habitStatuses ->
-                habitStatuses.filter { it.date == LocalDate.now() && it.isCompleted() }.map { it.habitId }
+                habitStatuses.filter { it.date == LocalDate.now() && it.isCompleted() }
+                    .map { it.habitId }
             }
             .flowOn(Dispatchers.Default)
     }
@@ -182,4 +186,105 @@ class HabitRepository(
         val completedStatuses = habitStatusDao.getCompletedStatuses(date)
         return completedStatuses.mapNotNull { habitDao.getHabitById(it.habitId)?.toHabit() }
     }
+}
+
+suspend fun HabitRepo.upsertLogic(action: StatusHabitAction) {
+    val habit = action.habit
+    val date = action.date
+    val notes = action.notes?.takeIf { it.isNotBlank() }
+    val numberValue = action.numberValue
+    val oldStatus = getStatusByHabitAndDate(habit.id, date)
+
+    @Suppress("IntroduceWhenSubject")
+    when {
+        action is ToggleBooleanStatus && oldStatus == null -> {
+            upsertHabitStatus(
+                HabitStatus(
+                    habitId = habit.id,
+                    date = date,
+                    ok = HabitCompletion.Completed,
+                    notes = null,
+                    numberValue = numberValue,
+                )
+            )
+        }
+
+        action is ToggleBooleanStatus && oldStatus != null -> {
+            if (oldStatus.notes != null) {
+                upsertHabitStatus(
+                    oldStatus.copy(
+                        ok = if (oldStatus.ok == HabitCompletion.Completed) HabitCompletion.OnlyNotes else HabitCompletion.Completed,
+                    )
+                )
+            } else {
+                deleteHabitStatus(habit.id, date)
+            }
+        }
+
+        action is SaveNoteDialog && oldStatus == null -> {
+            if (notes != null) {
+                upsertHabitStatus(
+                    HabitStatus(
+                        habitId = habit.id,
+                        date = date,
+                        ok = HabitCompletion.OnlyNotes,
+                        notes = action.notes,
+                        numberValue = null,
+                    )
+                )
+            } else {
+                // do nothing
+            }
+        }
+
+        action is SaveNoteDialog && oldStatus != null -> {
+            if (notes != null) {
+                upsertHabitStatus(oldStatus.copy(notes = notes))
+            } else {
+                if (oldStatus.numberValue != null) {
+                    upsertHabitStatus(oldStatus.copy(notes = null))
+                } else {
+                    deleteHabitStatus(habit.id, date)
+                }
+            }
+        }
+
+        action is SaveNumberDialog && oldStatus == null -> {
+            if (numberValue != null) {
+                upsertHabitStatus(
+                    HabitStatus(
+                        habitId = habit.id,
+                        date = date,
+                        ok = HabitCompletion.Completed,
+                        notes = null,
+                        numberValue = numberValue,
+                    )
+                )
+            } else {
+                // do nothing
+            }
+        }
+
+        action is SaveNumberDialog && oldStatus != null -> {
+            if (numberValue != null) {
+                upsertHabitStatus(
+                    oldStatus.copy(ok = HabitCompletion.Completed, numberValue = numberValue)
+                )
+            } else {
+                if (oldStatus.notes != null) {
+                    upsertHabitStatus(
+                        oldStatus.copy(
+                            ok = HabitCompletion.OnlyNotes,
+                            numberValue = null
+                        )
+                    )
+                } else {
+                    deleteHabitStatus(habit.id, date)
+                }
+            }
+        }
+
+        else -> throw NotImplementedError()
+    }
+
 }

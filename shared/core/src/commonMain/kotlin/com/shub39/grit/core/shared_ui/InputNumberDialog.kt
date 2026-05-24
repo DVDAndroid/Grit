@@ -40,6 +40,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shub39.grit.core.habits.presentation.HabitDialogStatusInfo
 import com.shub39.grit.core.habits.presentation.HabitsAction
+import com.shub39.grit.core.habits.presentation.HabitsAction.CloseDialog
+import com.shub39.grit.core.habits.presentation.StatusHabitAction
+import com.shub39.grit.core.habits.presentation.StatusHabitDialogMode.NumberValue
 import grit.shared.core.generated.resources.Res
 import grit.shared.core.generated.resources.delete
 import grit.shared.core.generated.resources.delete_numbervalue
@@ -69,7 +72,7 @@ fun InputNumberDialog(
         FloatArray(NUMBER_TOTAL) { i ->
             val centerIndex = NUMBER_TOTAL / 2
             val offset = i - centerIndex
-            round((selectedNumber + offset * NUMBER_STEP) * 10) / 10
+            round(((selectedNumber ?: 0f) + offset * NUMBER_STEP) * 10) / 10
         }
     }
 
@@ -109,7 +112,7 @@ fun InputNumberDialog(
     }
 
     AlertDialog(
-        onDismissRequest = { onAction(HabitsAction.CloseNotesDialog) },
+        onDismissRequest = { onAction(CloseDialog(NumberValue)) },
         title = { Text("Enter a value") },
         text = {
             Column {
@@ -182,11 +185,10 @@ fun InputNumberDialog(
                 Button(
                     onClick = {
                         onAction(
-                            HabitsAction.SaveNumberInputDialog(
+                            StatusHabitAction.SaveNumberDialog(
                                 habit = state.habit,
                                 date = state.date,
                                 numberValue = null,
-                                notes = state.notes,
                             )
                         )
                     },
@@ -218,11 +220,10 @@ fun InputNumberDialog(
                     text2Number()
 
                     onAction(
-                        HabitsAction.SaveNumberInputDialog(
+                        StatusHabitAction.SaveNumberDialog(
                             habit = state.habit,
                             date = state.date,
                             numberValue = selectedNumber,
-                            notes = state.notes,
                         )
                     )
                 },
@@ -233,7 +234,7 @@ fun InputNumberDialog(
         },
 
         dismissButton = {
-            Button(onClick = { onAction(HabitsAction.CloseNumberInputDialog) }) {
+            Button(onClick = { onAction(CloseDialog(NumberValue)) }) {
                 Text("Cancel")
             }
         }

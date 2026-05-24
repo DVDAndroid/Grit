@@ -56,6 +56,9 @@ import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.domain.StreakPosition
 import com.shub39.grit.core.habits.domain.calendarMapStreakShape
 import com.shub39.grit.core.habits.presentation.HabitsAction
+import com.shub39.grit.core.habits.presentation.HabitsAction.ShowDialog
+import com.shub39.grit.core.habits.presentation.StatusHabitAction.ToggleBooleanStatus
+import com.shub39.grit.core.habits.presentation.StatusHabitDialogMode
 import com.shub39.grit.core.habits.presentation.daysStartingFrom
 import com.shub39.grit.core.shared_ui.endItemShape
 import com.shub39.grit.core.theme.GritTheme
@@ -94,9 +97,13 @@ fun CalendarMap(
     val scope = rememberCoroutineScope()
 
     val notesDates =
-        remember(currentHabit.statuses) { currentHabit.statuses.filter { it.hasNotes() }.map { it.date }.toSet() }
+        remember(currentHabit.statuses) {
+            currentHabit.statuses.filter { it.hasNotes() }.map { it.date }.toSet()
+        }
     val doneDates =
-        remember(currentHabit.statuses) { currentHabit.statuses.filter { it.isCompleted() }.map { it.date }.toSet() }
+        remember(currentHabit.statuses) {
+            currentHabit.statuses.filter { it.isCompleted() }.map { it.date }.toSet()
+        }
     val edgeWeeks =
         listOf(calendarState.firstDayOfWeek, daysStartingFrom(calendarState.firstDayOfWeek).last())
 
@@ -168,12 +175,12 @@ fun CalendarMap(
                     Box(
                         modifier =
                             Modifier.padding(
-                                    top = 1.dp,
-                                    bottom = 1.dp,
-                                    start =
-                                        if (day.date.dayOfWeek == edgeWeeks.first()) 4.dp else 0.dp,
-                                    end = if (day.date.dayOfWeek == edgeWeeks.last()) 4.dp else 0.dp,
-                                )
+                                top = 1.dp,
+                                bottom = 1.dp,
+                                start =
+                                    if (day.date.dayOfWeek == edgeWeeks.first()) 4.dp else 0.dp,
+                                end = if (day.date.dayOfWeek == edgeWeeks.last()) 4.dp else 0.dp,
+                            )
                                 .fillMaxWidth()
                                 .height(40.dp)
                                 .clip(
@@ -188,10 +195,16 @@ fun CalendarMap(
                                 .combinedClickable(
                                     enabled = validDate,
                                     onClick = {
-                                        onAction(HabitsAction.InsertStatus(currentHabit.habit, day.date))
+                                        onAction(ToggleBooleanStatus(currentHabit.habit, day.date))
                                     },
                                     onLongClick = {
-                                        onAction(HabitsAction.ShowNotesDialog(currentHabit.habit, day.date))
+                                        onAction(
+                                            ShowDialog(
+                                                StatusHabitDialogMode.Notes,
+                                                currentHabit.habit,
+                                                day.date
+                                            )
+                                        )
                                     },
                                 ),
                         contentAlignment = Alignment.Center,
@@ -205,7 +218,7 @@ fun CalendarMap(
                             ) {
                                 val isStreakEnd =
                                     streakPosition == StreakPosition.START ||
-                                        streakPosition == StreakPosition.END
+                                            streakPosition == StreakPosition.END
 
                                 if (isStreakEnd) {
                                     Box(

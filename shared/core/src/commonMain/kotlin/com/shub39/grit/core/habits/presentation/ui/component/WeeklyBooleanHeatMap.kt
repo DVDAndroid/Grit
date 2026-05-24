@@ -17,7 +17,6 @@
 package com.shub39.grit.core.habits.presentation.ui.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Box
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,6 +54,9 @@ import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.domain.StreakPosition
 import com.shub39.grit.core.habits.domain.heatMapStreakShape
 import com.shub39.grit.core.habits.presentation.HabitsAction
+import com.shub39.grit.core.habits.presentation.HabitsAction.ShowDialog
+import com.shub39.grit.core.habits.presentation.StatusHabitAction.ToggleBooleanStatus
+import com.shub39.grit.core.habits.presentation.StatusHabitDialogMode.Notes
 import com.shub39.grit.core.habits.presentation.daysStartingFrom
 import com.shub39.grit.core.shared_ui.endItemShape
 import com.shub39.grit.core.shared_ui.leadingItemShape
@@ -201,10 +202,12 @@ fun WeeklyBooleanHeatMap(
                                     .combinedClickable(
                                         enabled = validDay,
                                         onClick = {
-                                            onAction(HabitsAction.InsertStatus(habit, day.date))
+                                            onAction(ToggleBooleanStatus(habit, day.date))
                                         },
                                         onLongClick = {
-                                            onAction(HabitsAction.ShowNotesDialog(habit, day.date))
+                                            onAction(
+                                                ShowDialog(Notes, habit, day.date)
+                                            )
                                         }
                                     ),
                             contentAlignment = Alignment.Center,

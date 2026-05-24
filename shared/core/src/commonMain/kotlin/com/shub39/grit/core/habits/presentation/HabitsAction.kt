@@ -45,24 +45,50 @@ sealed interface HabitsAction {
 
     data class DeleteHabit(val habit: Habit) : HabitsAction
 
-    /** Add/Remove status for [habit] at given [date] */
-    data class InsertStatus(val habit: Habit, val date: LocalDate) : HabitsAction
-
     data class UpdateHabit(val habit: Habit) : HabitsAction
 
     data object ReorderHabits : HabitsAction
 
     data class FetchCompletedHabitsForDate(val date: LocalDate) : HabitsAction
 
-    data class ShowNotesDialog(val habit: Habit, val date: LocalDate) : HabitsAction
-    data class SaveNotesDialog(val habit: Habit, val date: LocalDate, val numberValue: Float?, val notes: String) : HabitsAction
-    data object CloseNotesDialog : HabitsAction
+    data class ShowDialog(
+        val dialogMode: StatusHabitDialogMode,
+        val habit: Habit,
+        val date: LocalDate,
+    ) : HabitsAction
 
+    data class CloseDialog(val dialogMode: StatusHabitDialogMode) : HabitsAction
 
-    data class ShowNumberInputDialog(val habit: Habit, val date: LocalDate) : HabitsAction
-    data class SaveNumberInputDialog(val habit: Habit, val date: LocalDate, val numberValue: Float?, val notes: String) : HabitsAction
-    data object CloseNumberInputDialog : HabitsAction
+}
 
+enum class StatusHabitDialogMode {
+    Notes,
+    NumberValue,
+}
 
+sealed class StatusHabitAction(
+    open val habit: Habit,
+    open val date: LocalDate,
+    open val numberValue: Float?,
+    open val notes: String?,
+) : HabitsAction {
+
+    /** Add/Remove status for [habit] at given [date] */
+    data class ToggleBooleanStatus(
+        override val habit: Habit,
+        override val date: LocalDate,
+    ) : StatusHabitAction(habit, date, null, null)
+
+    data class SaveNoteDialog(
+        override val habit: Habit,
+        override val date: LocalDate,
+        override val notes: String?,
+    ) : StatusHabitAction(habit, date, null, notes)
+
+    data class SaveNumberDialog(
+        override val habit: Habit,
+        override val date: LocalDate,
+        override val numberValue: Float?,
+    ) : StatusHabitAction(habit, date, numberValue, null)
 
 }

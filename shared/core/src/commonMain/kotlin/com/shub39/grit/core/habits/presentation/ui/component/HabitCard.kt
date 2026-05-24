@@ -60,7 +60,10 @@ import com.kizitonwose.calendar.core.plusDays
 import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.presentation.HabitsAction
-import com.shub39.grit.core.habits.presentation.HabitsAction.*
+import com.shub39.grit.core.habits.presentation.HabitsAction.ShowDialog
+import com.shub39.grit.core.habits.presentation.StatusHabitAction.ToggleBooleanStatus
+import com.shub39.grit.core.habits.presentation.StatusHabitDialogMode
+import com.shub39.grit.core.habits.presentation.StatusHabitDialogMode.NumberValue
 import com.shub39.grit.core.utils.localized
 import com.shub39.grit.core.utils.now
 import com.shub39.grit.core.utils.toFormattedString
@@ -98,31 +101,31 @@ fun HabitCard(
 
     // animated colors
     val cardContent by
-        animateColorAsState(
-            targetValue =
-                when (completed) {
-                    true -> MaterialTheme.colorScheme.onPrimaryContainer
-                    else ->
-                        MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = if (canCompleteToday) 1f else 0.7f
-                        )
-                },
-            animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
-            label = "cardBackground",
-        )
+    animateColorAsState(
+        targetValue =
+            when (completed) {
+                true -> MaterialTheme.colorScheme.onPrimaryContainer
+                else ->
+                    MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = if (canCompleteToday) 1f else 0.7f
+                    )
+            },
+        animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
+        label = "cardBackground",
+    )
     val cardBackground by
-        animateColorAsState(
-            targetValue =
-                when (completed) {
-                    true -> MaterialTheme.colorScheme.primaryContainer
-                    else ->
-                        MaterialTheme.colorScheme.surfaceContainer.copy(
-                            alpha = if (canCompleteToday) 1f else 0.7f
-                        )
-                },
-            animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
-            label = "cardBackground",
-        )
+    animateColorAsState(
+        targetValue =
+            when (completed) {
+                true -> MaterialTheme.colorScheme.primaryContainer
+                else ->
+                    MaterialTheme.colorScheme.surfaceContainer.copy(
+                        alpha = if (canCompleteToday) 1f else 0.7f
+                    )
+            },
+        animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
+        label = "cardBackground",
+    )
 
     val weekState =
         rememberWeekCalendarState(
@@ -132,10 +135,10 @@ fun HabitCard(
             firstDayOfWeek = startingDay,
         )
 
-    val completeAction = { d: LocalDate->
+    val completeAction = { d: LocalDate ->
         when (habitWithAnalytics.habit.type) {
-            HabitType.Boolean -> action(InsertStatus(habitWithAnalytics.habit, d))
-            HabitType.Numeric -> action(ShowNumberInputDialog(habitWithAnalytics.habit, d))
+            HabitType.Boolean -> action(ToggleBooleanStatus(habitWithAnalytics.habit, d))
+            HabitType.Numeric -> action(ShowDialog(NumberValue, habitWithAnalytics.habit, d))
         }
     }
 
@@ -256,7 +259,7 @@ fun HabitCard(
                     val done = status?.isCompleted() ?: false
                     val validDay =
                         weekDay.date <= today &&
-                            weekDay.date.dayOfWeek in habitWithAnalytics.habit.days
+                                weekDay.date.dayOfWeek in habitWithAnalytics.habit.days
 
                     Box(
                         modifier =
@@ -265,11 +268,15 @@ fun HabitCard(
                                     if (done) {
                                         val donePrevious =
                                             habitWithAnalytics.statuses.any {
-                                                it.isCompleted() && it.date == weekDay.date.minusDays(1)
+                                                it.isCompleted() && it.date == weekDay.date.minusDays(
+                                                    1
+                                                )
                                             }
                                         val doneAfter =
                                             habitWithAnalytics.statuses.any {
-                                                it.isCompleted() && it.date == weekDay.date.plusDays(1)
+                                                it.isCompleted() && it.date == weekDay.date.plusDays(
+                                                    1
+                                                )
                                             }
                                         val shape =
                                             when {
@@ -306,7 +313,8 @@ fun HabitCard(
                                     },
                                     onLongClick = {
                                         action(
-                                            HabitsAction.ShowNotesDialog(
+                                            ShowDialog(
+                                                StatusHabitDialogMode.Notes,
                                                 habit = habitWithAnalytics.habit,
                                                 date = weekDay.date,
                                             ),
@@ -332,7 +340,8 @@ fun HabitCard(
                             )
 
                             Text(
-                                text = stringResource(weekDay.date.dayOfWeek.localized()).uppercase().take(3),
+                                text = stringResource(weekDay.date.dayOfWeek.localized()).uppercase()
+                                    .take(3),
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1,
                                 modifier = Modifier.basicMarquee(),

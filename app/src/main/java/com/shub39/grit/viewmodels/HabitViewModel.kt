@@ -21,13 +21,13 @@ import androidx.lifecycle.viewModelScope
 import com.shub39.grit.core.domain.AlarmScheduler
 import com.shub39.grit.core.domain.SettingsDatastore
 import com.shub39.grit.core.habits.domain.Habit
-import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitRepo
-import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.presentation.HabitDialogStatusInfo
 import com.shub39.grit.core.habits.presentation.HabitState
 import com.shub39.grit.core.habits.presentation.HabitsAction
-import kotlin.time.ExperimentalTime
+import com.shub39.grit.core.habits.presentation.StatusHabitAction
+import com.shub39.grit.core.habits.presentation.StatusHabitDialogMode
+import com.shub39.grit.habits.data.repository.upsertLogic
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,8 +39,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDate
 import org.koin.core.annotation.KoinViewModel
+import kotlin.time.ExperimentalTime
 
 @KoinViewModel
 class HabitViewModel(
@@ -74,7 +74,7 @@ class HabitViewModel(
 
                 is HabitsAction.DeleteHabit -> deleteHabit(action.habit)
 
-                is HabitsAction.InsertStatus -> upsertHabitStatus(action.habit, action.date, numberValue = null, notes = null)
+                is StatusHabitAction.ToggleBooleanStatus -> repo.upsertLogic(action)
 
                 is HabitsAction.UpdateHabit -> upsertHabit(action.habit)
 
@@ -121,56 +121,38 @@ class HabitViewModel(
                     }
                 }
 
-                is HabitsAction.ShowNotesDialog -> {
+                is HabitsAction.ShowDialog -> {
                     _state.update {
                         val status = repo.getStatusByHabitAndDate(
                             action.habit.id,
                             action.date
                         )
-                        it.copy(
-                            notesDialog = HabitDialogStatusInfo(
-                                habit = action.habit,
-                                date = action.date,
-                                numberValue = status?.numberValue ?: 0f,
-                                notes = status?.notes.orEmpty(),
-                            )
+                        val dialogStatusInfo = HabitDialogStatusInfo(
+                            habit = action.habit,
+                            date = action.date,
+                            numberValue = status?.numberValue,
+                            notes = status?.notes.orEmpty(),
                         )
+                        when (action.dialogMode) {
+                            StatusHabitDialogMode.Notes -> it.copy(notesDialog = dialogStatusInfo)
+                            StatusHabitDialogMode.NumberValue -> it.copy(inputNumberDialog = dialogStatusInfo)
+                        }
                     }
                 }
 
-                is HabitsAction.SaveNotesDialog -> {
-                    upsertHabitStatus(action.habit, action.date, action.numberValue, action.notes)
+                is StatusHabitAction.SaveNoteDialog -> {
+                    repo.upsertLogic(action)
                     _state.update { it.copy(notesDialog = null) }
                 }
 
-                HabitsAction.CloseNotesDialog -> {
-                    _state.update { it.copy(notesDialog = null) }
-                }
-
-                is HabitsAction.ShowNumberInputDialog -> {
-                    _state.update {
-                        val status = repo.getStatusByHabitAndDate(
-                            action.habit.id,
-                            action.date
-                        )
-                        it.copy(
-                            inputNumberDialog = HabitDialogStatusInfo(
-                                habit = action.habit,
-                                date = action.date,
-                                numberValue = status?.numberValue ?: 0f,
-                                notes = status?.notes.orEmpty(),
-                            )
-                        )
-                    }
-                }
-
-                is HabitsAction.SaveNumberInputDialog -> {
-                    upsertHabitStatus(action.habit, action.date, action.numberValue, action.notes)
+                is StatusHabitAction.SaveNumberDialog -> {
+                    repo.upsertLogic(action)
                     _state.update { it.copy(inputNumberDialog = null) }
                 }
 
-                HabitsAction.CloseNumberInputDialog ->  {
-                    _state.update { it.copy(inputNumberDialog = null) }
+                is HabitsAction.CloseDialog -> when (action.dialogMode) {
+                    StatusHabitDialogMode.Notes -> _state.update { it.copy(notesDialog = null) }
+                    StatusHabitDialogMode.NumberValue -> _state.update { it.copy(inputNumberDialog = null) }
                 }
             }
         }
@@ -181,16 +163,15 @@ class HabitViewModel(
         habitStatusJob?.cancel()
         habitStatusJob =
             viewModelScope.launch {
-                combine(repo.getHabitsWithAnalytics(), repo.getCompletedHabitIds()) {
-                        habits,
-                        completedHabits ->
-                        _state.update {
-                            it.copy(
-                                habitsWithAnalytics = habits,
-                                completedHabitIds = completedHabits,
-                            )
-                        }
+                combine(repo.getHabitsWithAnalytics(), repo.getCompletedHabitIds()) { habits,
+                                                                                      completedHabits ->
+                    _state.update {
+                        it.copy(
+                            habitsWithAnalytics = habits,
+                            completedHabitIds = completedHabits,
+                        )
                     }
+                }
                     .launchIn(this)
             }
     }
@@ -241,56 +222,4 @@ class HabitViewModel(
         scheduler.cancel(habit)
     }
 
-    private suspend fun upsertHabitStatus(habit: Habit, date: LocalDate, numberValue: Float?, notes: String?) {
-        val existing = _state.value.habitsWithAnalytics
-            .find { it.habit == habit }
-            ?.statuses
-            ?.find { it.date == date }
-
-        when {
-            // --- CLICK (notes == null) ---
-
-            // No record -> create HabitCompletion.Completed
-            notes == null && existing == null -> {
-                repo.upsertHabitStatus(HabitStatus(habitId = habit.id, date = date, ok = HabitCompletion.Completed, notes = null, numberValue = null))
-            }
-
-            // HabitCompletion.Completed, no notes -> delete
-            notes == null && existing?.ok == HabitCompletion.Completed && existing.notes == null -> {
-                repo.deleteHabitStatus(habit.id, date)
-            }
-
-            // HabitCompletion.Completed with notes -> downgrade to HabitCompletion.OnlyNotes, preserve notes
-            notes == null && existing?.ok == HabitCompletion.Completed && existing.notes != null -> {
-                repo.upsertHabitStatus(existing.copy(ok = HabitCompletion.OnlyNotes))
-            }
-
-            // HabitCompletion.OnlyNotes -> upgrade to HabitCompletion.Completed, preserve notes
-            notes == null && existing?.ok == HabitCompletion.OnlyNotes -> {
-                repo.upsertHabitStatus(existing.copy(ok = HabitCompletion.Completed))
-            }
-
-            // --- SAVE NOTES (notes != null) ---
-
-            // No record -> create HabitCompletion.OnlyNotes
-            notes != null && existing == null -> {
-                repo.upsertHabitStatus(HabitStatus(habitId = habit.id, date = date, ok = HabitCompletion.OnlyNotes, notes = notes, numberValue = null))
-            }
-
-            // Any existing record -> update notes, preserve ok
-            notes != null && existing != null && notes.isNotEmpty() -> {
-                repo.upsertHabitStatus(existing.copy(notes = notes))
-            }
-
-            // Empty notes + HabitCompletion.OnlyNotes -> delete record
-            notes != null && notes.isEmpty() && existing?.ok == HabitCompletion.OnlyNotes -> {
-                repo.deleteHabitStatus(habit.id, date)
-            }
-
-            // Empty notes + HabitCompletion.Completed -> clear notes, keep completed
-            notes != null && notes.isEmpty() && existing?.ok == HabitCompletion.Completed -> {
-                repo.upsertHabitStatus(existing.copy(notes = null))
-            }
-        }
-    }
 }
