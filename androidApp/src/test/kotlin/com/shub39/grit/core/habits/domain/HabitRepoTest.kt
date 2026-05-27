@@ -1,6 +1,6 @@
 package com.shub39.grit.core.habits.domain
 
-import com.shub39.grit.core.utils.now
+import com.shub39.grit.core.now
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime

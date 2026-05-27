@@ -10,8 +10,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import grit.shared.core.generated.resources.Res
-import grit.shared.core.generated.resources.done
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.done
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

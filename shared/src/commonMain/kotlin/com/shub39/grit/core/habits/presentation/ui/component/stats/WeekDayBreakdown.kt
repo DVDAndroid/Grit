@@ -45,13 +45,16 @@ import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
 import com.shub39.grit.core.GritPreviewWrapper
 import com.shub39.grit.core.habits.domain.WeekDayFrequencyData
-import com.shub39.grit.core.utils.GritPreviewWrapper
-import grit.shared.core.generated.resources.Res
-import grit.shared.core.generated.resources.view_day
-import grit.shared.core.generated.resources.week_breakdown
+import com.shub39.grit.core.habits.presentation.ui.component.AnalyticsCard
+import com.shub39.grit.core.habits.presentation.ui.component.NotEnoughData
+import com.shub39.grit.core.localized
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.view_day
+import grit.shared.generated.resources.week_breakdown
+import kotlinx.datetime.DayOfWeek
+import org.jetbrains.compose.resources.stringResource
 import kotlin.random.Random
 import kotlin.random.nextInt
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun WeekDayBreakdown(
@@ -78,10 +81,10 @@ fun WeekDayBreakdown(
             ) {
                 weekDayData.forEach { (day, data) ->
                     val height by
-                        animateDpAsState(
-                            targetValue = ((data.toFloat() / max.toFloat()) * 200).dp,
-                            animationSpec = MaterialTheme.motionScheme.slowSpatialSpec(),
-                        )
+                    animateDpAsState(
+                        targetValue = ((data.toFloat() / max.toFloat()) * 200).dp,
+                        animationSpec = MaterialTheme.motionScheme.slowSpatialSpec(),
+                    )
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,

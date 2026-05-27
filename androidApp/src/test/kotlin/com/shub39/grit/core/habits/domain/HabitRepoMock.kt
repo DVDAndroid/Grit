@@ -43,7 +43,8 @@ class HabitRepoMock : HabitRepo {
 
     override suspend fun getHabitStatuses(): List<HabitStatus> = statusHabitList.values.flatten()
 
-    override suspend fun getStatusForHabit(id: Long): List<HabitStatus> = statusHabitList[id].orEmpty().toList()
+    override suspend fun getStatusForHabit(id: Long): List<HabitStatus> =
+        statusHabitList[id].orEmpty().toList()
 
     override suspend fun getStatusByHabitAndDate(
         habitId: Long,

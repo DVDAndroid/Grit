@@ -34,6 +34,7 @@ import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.minusYears
 import com.kizitonwose.calendar.core.now
 import com.shub39.grit.core.GritPreviewWrapper
+import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.presentation.daysStartingFrom
 import com.shub39.grit.core.habits.presentation.ui.component.AnalyticsCard
@@ -41,7 +42,9 @@ import com.shub39.grit.core.habits.presentation.ui.component.CalendarDayContent
 import com.shub39.grit.core.habits.presentation.ui.component.CalendarMonthHeader
 import com.shub39.grit.core.habits.presentation.ui.component.CardArrows
 import com.shub39.grit.core.now
-import grit.shared.generated.resources.*
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.calendar_month
+import grit.shared.generated.resources.monthly_progress
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -68,12 +71,16 @@ fun CalendarMap(
     onNavigateToPaywall: () -> Unit,
     onNavigateToCalendar: () -> Unit,
     onDateClick: (LocalDate) -> Unit,
+    onDateLongClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val today = LocalDate.now()
     val scope = rememberCoroutineScope()
 
-    val doneDates = remember(statuses) { statuses.map { it.date }.toSet() }
+    val notesDates =
+        remember(statuses) { statuses.filter { it.hasNotes() }.map { it.date }.toSet() }
+    val doneDates =
+        remember(statuses) { statuses.filter { it.isCompleted() }.map { it.date }.toSet() }
     val edgeWeeks =
         listOf(calendarState.firstDayOfWeek, daysStartingFrom(calendarState.firstDayOfWeek).last())
 
@@ -108,9 +115,9 @@ fun CalendarMap(
             state = calendarState,
             modifier =
                 Modifier.background(
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        shape = MaterialTheme.shapes.medium,
-                    )
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shape = MaterialTheme.shapes.medium,
+                )
                     .animateContentSize()
                     .padding(vertical = 16.dp),
             contentPadding = PaddingValues(horizontal = 16.dp),
@@ -125,11 +132,13 @@ fun CalendarMap(
             dayContent = { day ->
                 CalendarDayContent(
                     day = day,
+                    notesDates = notesDates,
                     doneDates = doneDates,
                     today = today,
                     habitDays = days,
                     edgeWeeks = edgeWeeks,
                     onDateClick = onDateClick,
+                    onDateLongClick = onDateLongClick,
                 )
             },
         )
@@ -150,11 +159,18 @@ private fun Preview() {
             ),
         statuses =
             (0..40).map {
-                HabitStatus(habitId = 1, date = LocalDate.now().minus(it, DateTimeUnit.DAY))
+                HabitStatus(
+                    habitId = 1,
+                    date = LocalDate.now().minus(it, DateTimeUnit.DAY),
+                    ok = HabitCompletion.Completed,
+                    notes = null,
+                    numberValue = null,
+                )
             },
         days = DayOfWeek.entries.toSet(),
         onNavigateToPaywall = {},
         onDateClick = {},
+        onDateLongClick = {},
         onNavigateToCalendar = {},
     )
 }

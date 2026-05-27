@@ -16,14 +16,14 @@
  */
 package com.shub39.grit.core
 
-import grit.shared.core.generated.resources.Res
-import grit.shared.core.generated.resources.monday
-import grit.shared.core.generated.resources.tuesday
-import grit.shared.core.generated.resources.wednesday
-import grit.shared.core.generated.resources.thursday
-import grit.shared.core.generated.resources.friday
-import grit.shared.core.generated.resources.saturday
-import grit.shared.core.generated.resources.sunday
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.friday
+import grit.shared.generated.resources.monday
+import grit.shared.generated.resources.saturday
+import grit.shared.generated.resources.sunday
+import grit.shared.generated.resources.thursday
+import grit.shared.generated.resources.tuesday
+import grit.shared.generated.resources.wednesday
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime

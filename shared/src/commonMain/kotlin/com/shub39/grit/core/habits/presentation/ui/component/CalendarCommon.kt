@@ -17,14 +17,16 @@
 package com.shub39.grit.core.habits.presentation.ui.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,12 +44,15 @@ import com.kizitonwose.calendar.core.plusDays
 import com.shub39.grit.core.habits.domain.StreakPosition
 import com.shub39.grit.core.habits.domain.calendarMapStreakShape
 import com.shub39.grit.core.theme.flexFontRounded
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.edit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.YearMonth
 import kotlinx.datetime.format
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
+import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun CalendarMonthHeader(
@@ -79,17 +84,20 @@ fun CalendarMonthHeader(
 @Composable
 fun CalendarDayContent(
     day: CalendarDay,
+    notesDates: Set<LocalDate>,
     doneDates: Set<LocalDate>,
     today: LocalDate,
     habitDays: Set<DayOfWeek>,
     edgeWeeks: List<DayOfWeek>,
     onDateClick: (LocalDate) -> Unit,
+    onDateLongClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
     height: Dp = 40.dp,
     style: TextStyle = MaterialTheme.typography.bodyLarge,
 ) {
     if (day.position != DayPosition.MonthDate) return
 
+    val withNote = day.date in notesDates
     val done = day.date in doneDates
     val validDate = day.date <= today && day.date.dayOfWeek in habitDays
 
@@ -123,7 +131,11 @@ fun CalendarDayContent(
                         isLastDayOfMonth = day.date.plusDays(1).day == 1,
                     )
                 )
-                .clickable(enabled = validDate) { onDateClick(day.date) },
+                .combinedClickable(
+                    enabled = validDate,
+                    onClick = { onDateClick(day.date) },
+                    onLongClick = { onDateLongClick(day.date) }
+                ),
         contentAlignment = Alignment.Center,
     ) {
         if (done) {
@@ -146,6 +158,17 @@ fun CalendarDayContent(
                                 ),
                         contentAlignment = Alignment.Center,
                     ) {
+                        if (withNote) {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.edit),
+                                contentDescription = "Notes",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .size(if (height == 40.dp) 12.dp else 6.dp)
+                                    .align(Alignment.TopEnd)
+                            )
+                        }
+
                         Text(
                             text = day.date.day.toString(),
                             style = style,
@@ -153,6 +176,17 @@ fun CalendarDayContent(
                         )
                     }
                 } else {
+                    if (withNote) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.edit),
+                            contentDescription = "Notes",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier
+                                .size(if (height == 40.dp) 12.dp else 6.dp)
+                                .align(Alignment.TopEnd)
+                        )
+                    }
+
                     Text(
                         text = day.date.day.toString(),
                         style = style,
@@ -161,6 +195,17 @@ fun CalendarDayContent(
                 }
             }
         } else {
+            if (withNote) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.edit),
+                    contentDescription = "Notes",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(if (height == 40.dp) 12.dp else 6.dp)
+                        .align(Alignment.TopEnd)
+                )
+            }
+
             Text(
                 text = day.date.day.toString(),
                 style = style,

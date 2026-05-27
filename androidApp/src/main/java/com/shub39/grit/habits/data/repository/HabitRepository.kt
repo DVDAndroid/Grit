@@ -18,6 +18,8 @@ package com.shub39.grit.habits.data.repository
 
 import com.shub39.grit.core.data.notification.GritNotificationManager
 import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.habits.domain.HabitCompletion
+import com.shub39.grit.core.habits.domain.HabitRanking
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
@@ -30,7 +32,10 @@ import com.shub39.grit.core.now
 import com.shub39.grit.domain.SettingsDatastore
 import com.shub39.grit.habits.data.database.HabitStatusDao
 import com.shub39.grit.habits.data.database.HabitsDao
-import kotlin.time.ExperimentalTime
+import com.shub39.grit.habits.data.toHabit
+import com.shub39.grit.habits.data.toHabitEntity
+import com.shub39.grit.habits.data.toHabitStatus
+import com.shub39.grit.habits.data.toHabitStatusEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -45,7 +50,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
-import kotlinx.datetime.minus
 import org.koin.core.annotation.Single
 import kotlin.time.ExperimentalTime
 

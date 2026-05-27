@@ -47,23 +47,22 @@ import com.kizitonwose.calendar.compose.heatmapcalendar.rememberHeatMapCalendarS
 import com.kizitonwose.calendar.core.minusDays
 import com.kizitonwose.calendar.core.now
 import com.kizitonwose.calendar.core.plusDays
-import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.GritPreviewWrapper
+import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitStatus
-import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.domain.StreakPosition
 import com.shub39.grit.core.habits.domain.heatMapStreakShape
-import com.shub39.grit.core.habits.presentation.HabitsAction
 import com.shub39.grit.core.habits.presentation.daysStartingFrom
 import com.shub39.grit.core.habits.presentation.ui.component.AnalyticsCard
 import com.shub39.grit.core.habits.presentation.ui.component.CardArrows
+import com.shub39.grit.core.localized
 import com.shub39.grit.core.now
 import com.shub39.grit.core.shared_ui.endItemShape
 import com.shub39.grit.core.shared_ui.leadingItemShape
-import com.shub39.grit.core.utils.GritPreviewWrapper
-import com.shub39.grit.core.utils.now
-import grit.shared.core.generated.resources.Res
-import grit.shared.core.generated.resources.view_week
-import grit.shared.core.generated.resources.weekly_progress
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.edit
+import grit.shared.generated.resources.view_week
+import grit.shared.generated.resources.weekly_progress
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -90,6 +89,7 @@ fun WeeklyBooleanHeatMap(
     days: Set<DayOfWeek>,
     statuses: List<HabitStatus>,
     onDateClick: (LocalDate) -> Unit,
+    onDateLongClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val today = LocalDate.now()
@@ -204,15 +204,8 @@ fun WeeklyBooleanHeatMap(
                                     .clip(shape)
                                     .combinedClickable(
                                         enabled = validDay,
-                                        onClick = {
-//                                            onDateClick(day.date) // todo:
-//                                            onAction(ToggleBooleanStatus(habit, day.date))
-                                        },
-                                        onLongClick = {
-                                            onAction(
-                                                ShowDialog(Notes, habit, day.date)
-                                            )
-                                        }
+                                        onClick = { onDateClick(day.date) },
+                                        onLongClick = { onDateLongClick(day.date) }
                                     ),
                             contentAlignment = Alignment.Center,
                         ) {
@@ -225,7 +218,7 @@ fun WeeklyBooleanHeatMap(
                                 ) {
                                     val isStreakEnd =
                                         streakPosition == StreakPosition.START ||
-                                            streakPosition == StreakPosition.END
+                                                streakPosition == StreakPosition.END
                                     if (isStreakEnd) {
                                         Box(
                                             modifier =
@@ -313,17 +306,6 @@ private fun Preview() {
                 firstVisibleMonth = YearMonth.now(),
                 firstDayOfWeek = DayOfWeek.MONDAY,
             ),
-        onAction = {},
-        habit =
-            Habit(
-                id = 1,
-                title = "Test Habit",
-                description = "A Test Habit",
-                time = LocalDateTime.now(),
-                days = DayOfWeek.entries.toSet(),
-                index = 1,
-                reminder = false,
-            ),
         statuses =
             (0..40).map {
                 HabitStatus(
@@ -336,5 +318,6 @@ private fun Preview() {
             },
         days = DayOfWeek.entries.toSet(),
         onDateClick = {},
+        onDateLongClick = {},
     )
 }

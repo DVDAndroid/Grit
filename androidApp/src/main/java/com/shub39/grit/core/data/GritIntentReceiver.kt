@@ -20,14 +20,17 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.shub39.grit.core.domain.AlarmScheduler
-import com.shub39.grit.core.domain.IntentActions
-import com.shub39.grit.core.domain.SettingsDatastore
+import androidx.core.app.RemoteInput
+import com.shub39.grit.core.data.notification.GritNotificationManager
+import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
+import com.shub39.grit.core.habits.domain.HabitType
+import com.shub39.grit.core.now
 import com.shub39.grit.core.tasks.domain.TaskRepo
-import com.shub39.grit.core.utils.now
-import kotlin.time.ExperimentalTime
+import com.shub39.grit.domain.AlarmScheduler
+import com.shub39.grit.domain.IntentActions
+import com.shub39.grit.domain.SettingsDatastore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -119,13 +122,15 @@ class GritIntentReceiver : BroadcastReceiver(), KoinComponent {
             }
         }
 
-        habitRepo.upsertHabitStatus(HabitStatus(
-            habitId = habitId,
-            date = LocalDate.now(),
-            ok = HabitCompletion.byValue(completed),
-            notes = notes,
-            numberValue = habitNumberValue,
-        ))
+        habitRepo.upsertHabitStatus(
+            HabitStatus(
+                habitId = habitId,
+                date = LocalDate.now(),
+                ok = HabitCompletion.byValue(completed),
+                notes = notes,
+                numberValue = habitNumberValue,
+            )
+        )
 
         Log.d(TAG, "Habit status added successfully")
 

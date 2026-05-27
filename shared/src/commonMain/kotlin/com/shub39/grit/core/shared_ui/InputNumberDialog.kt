@@ -43,11 +43,11 @@ import com.shub39.grit.core.habits.presentation.HabitsAction
 import com.shub39.grit.core.habits.presentation.HabitsAction.CloseDialog
 import com.shub39.grit.core.habits.presentation.StatusHabitAction
 import com.shub39.grit.core.habits.presentation.StatusHabitDialogMode.NumberValue
-import grit.shared.core.generated.resources.Res
-import grit.shared.core.generated.resources.delete
-import grit.shared.core.generated.resources.delete_numbervalue
-import grit.shared.core.generated.resources.keyboard
-import grit.shared.core.generated.resources.swipe_vertical
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.delete
+import grit.shared.generated.resources.delete_numbervalue
+import grit.shared.generated.resources.keyboard
+import grit.shared.generated.resources.swipe_vertical
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource

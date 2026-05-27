@@ -57,16 +57,18 @@ import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 import com.kizitonwose.calendar.core.minusDays
 import com.kizitonwose.calendar.core.plusDays
-import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.presentation.HabitsAction
-import com.shub39.grit.core.utils.now
-import com.shub39.grit.core.utils.toFormattedString
-import grit.shared.core.generated.resources.Res
-import grit.shared.core.generated.resources.analytics
-import grit.shared.core.generated.resources.check_circle
-import grit.shared.core.generated.resources.circle_border
-import grit.shared.core.generated.resources.heat
+import com.shub39.grit.core.habits.presentation.habitAction
+import com.shub39.grit.core.localized
+import com.shub39.grit.core.now
+import com.shub39.grit.core.toFormattedString
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.analytics
+import grit.shared.generated.resources.check_circle
+import grit.shared.generated.resources.circle_border
+import grit.shared.generated.resources.edit
+import grit.shared.generated.resources.heat
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -129,13 +131,6 @@ fun HabitCard(
             firstDayOfWeek = startingDay,
         )
 
-    val completeAction = { d: LocalDate ->
-        when (habitWithAnalytics.habit.type) {
-            HabitType.Boolean -> action(ToggleBooleanStatus(habitWithAnalytics.habit, d))
-            HabitType.Numeric -> action(ShowDialog(NumberValue, habitWithAnalytics.habit, d))
-        }
-    }
-
     Card(
         colors =
             CardDefaults.outlinedCardColors(
@@ -143,7 +138,7 @@ fun HabitCard(
                 contentColor = cardContent,
             ),
         onClick = {
-            if (canCompleteToday) completeAction(today)
+            if (canCompleteToday) action(habitAction(long = false, habitWithAnalytics.habit, today))
         },
         shape = shape,
         modifier =
@@ -303,15 +298,21 @@ fun HabitCard(
                                     role = Role.Button,
                                     enabled = validDay,
                                     onClick = {
-                                        completeAction(weekDay.date)
+                                        action(
+                                            habitAction(
+                                                long = false,
+                                                habitWithAnalytics.habit,
+                                                weekDay.date
+                                            )
+                                        )
                                     },
                                     onLongClick = {
                                         action(
-                                            ShowDialog(
-                                                StatusHabitDialogMode.Notes,
-                                                habit = habitWithAnalytics.habit,
-                                                date = weekDay.date,
-                                            ),
+                                            habitAction(
+                                                long = true,
+                                                habitWithAnalytics.habit,
+                                                weekDay.date
+                                            )
                                         )
                                     }
                                 ),

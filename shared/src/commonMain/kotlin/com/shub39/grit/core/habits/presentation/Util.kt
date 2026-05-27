@@ -16,6 +16,8 @@
  */
 package com.shub39.grit.core.habits.presentation
 
+import com.shub39.grit.core.habits.domain.Habit
+import com.shub39.grit.core.habits.domain.HabitType
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.YearMonth
@@ -60,4 +62,29 @@ fun formatDateWithOrdinal(date: LocalDate): String {
         )
 
     return "${getOrdinalSuffix(day)} $yearMonth"
+}
+
+
+fun habitAction(long: Boolean, habit: Habit, date: LocalDate): HabitsAction {
+    if (long) {
+        return HabitsAction.ShowDialog(
+            StatusHabitDialogMode.Notes,
+            habit = habit,
+            date = date,
+        )
+    } else {
+        return when (habit.type) {
+            HabitType.Boolean ->
+                StatusHabitAction.ToggleBooleanStatus(
+                    habit,
+                    date,
+                )
+
+            HabitType.Numeric -> HabitsAction.ShowDialog(
+                StatusHabitDialogMode.NumberValue,
+                habit,
+                date,
+            )
+        }
+    }
 }

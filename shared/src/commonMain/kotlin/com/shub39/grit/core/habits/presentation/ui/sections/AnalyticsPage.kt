@@ -64,8 +64,11 @@ import com.kizitonwose.calendar.compose.heatmapcalendar.rememberHeatMapCalendarS
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.minusMonths
 import com.kizitonwose.calendar.core.now
+import com.shub39.grit.core.LocalWindowSizeClass
+import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.presentation.HabitState
 import com.shub39.grit.core.habits.presentation.HabitsAction
+import com.shub39.grit.core.habits.presentation.habitAction
 import com.shub39.grit.core.habits.presentation.ui.component.HabitUpsertSheet
 import com.shub39.grit.core.habits.presentation.ui.component.stats.CalendarMap
 import com.shub39.grit.core.habits.presentation.ui.component.stats.StartStats
@@ -73,11 +76,16 @@ import com.shub39.grit.core.habits.presentation.ui.component.stats.WeekDayBreakd
 import com.shub39.grit.core.habits.presentation.ui.component.stats.WeeklyActivity
 import com.shub39.grit.core.habits.presentation.ui.component.stats.WeeklyBooleanHeatMap
 import com.shub39.grit.core.shared_ui.GritDialog
-import com.shub39.grit.core.shared_ui.endItemShape
-import com.shub39.grit.core.shared_ui.leadingItemShape
+import com.shub39.grit.core.shared_ui.NotesDialog
 import com.shub39.grit.core.theme.flexFontEmphasis
 import com.shub39.grit.core.theme.flexFontRounded
-import grit.shared.generated.resources.*
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.cancel
+import grit.shared.generated.resources.delete
+import grit.shared.generated.resources.delete_warning
+import grit.shared.generated.resources.edit
+import grit.shared.generated.resources.nav_arrow_back
+import grit.shared.generated.resources.warning
 import kotlinx.datetime.YearMonth
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -204,24 +212,31 @@ fun AnalyticsPage(
             if (currentHabit.habit.type == HabitType.Boolean) {
                 item {
 
-                        WeeklyBooleanHeatMap(
-                            heatMapState = heatMapState,
-                            statuses = currentHabit.statuses,
-                            days = currentHabit.habit.days,
-                            onDateClick = { onAction(HabitsAction.InsertStatus(currentHabit.habit, it)) },
-                )
-            }
-                        item {
-                        CalendarMap(
-                            canSeeContent = isUserSubscribed,
-
-                            calendarState = calendarState,
-                           onNavigateToPaywall = onNavigateToPaywall,
-                    statuses = currentHabit.statuses,
-                    days = currentHabit.habit.days,
-                            onNavigateToCalendar = onNavigateToCalendar,
-                            onDateClick = {
-                        onAction(HabitsAction.InsertStatus(habit = currentHabit.habit, date = it))
+                    WeeklyBooleanHeatMap(
+                        heatMapState = heatMapState,
+                        statuses = currentHabit.statuses,
+                        days = currentHabit.habit.days,
+                        onDateClick = {
+                            onAction(habitAction(long = false, currentHabit.habit, it))
+                        },
+                        onDateLongClick = {
+                            onAction(habitAction(long = true, currentHabit.habit, it))
+                        },
+                    )
+                }
+                item {
+                    CalendarMap(
+                        canSeeContent = isUserSubscribed,
+                        calendarState = calendarState,
+                        onNavigateToPaywall = onNavigateToPaywall,
+                        statuses = currentHabit.statuses,
+                        days = currentHabit.habit.days,
+                        onNavigateToCalendar = onNavigateToCalendar,
+                        onDateClick = {
+                            onAction(habitAction(long = false, currentHabit.habit, it))
+                        },
+                        onDateLongClick = {
+                            onAction(habitAction(long = true, currentHabit.habit, it))
                         },
                     )
                 }

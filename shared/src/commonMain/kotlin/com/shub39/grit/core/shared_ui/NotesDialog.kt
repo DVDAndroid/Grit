@@ -18,8 +18,8 @@ import com.shub39.grit.core.habits.presentation.HabitsAction
 import com.shub39.grit.core.habits.presentation.HabitsAction.CloseDialog
 import com.shub39.grit.core.habits.presentation.StatusHabitAction
 import com.shub39.grit.core.habits.presentation.StatusHabitDialogMode.Notes
-import grit.shared.core.generated.resources.Res
-import grit.shared.core.generated.resources.backspace
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.backspace
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable

@@ -1,7 +1,7 @@
 package com.shub39.grit.core.habits.domain
 
 import com.shub39.grit.core.habits.presentation.StatusHabitAction
-import com.shub39.grit.core.utils.now
+import com.shub39.grit.core.now
 import com.shub39.grit.habits.data.repository.upsertLogic
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.DayOfWeek

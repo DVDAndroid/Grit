@@ -57,9 +57,12 @@ import com.shub39.grit.core.habits.domain.CalendarType.Companion.toStringRes
 import com.shub39.grit.core.habits.domain.Habit
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.presentation.HabitState
+import com.shub39.grit.core.habits.presentation.HabitsAction
 import com.shub39.grit.core.habits.presentation.daysStartingFrom
 import com.shub39.grit.core.habits.presentation.ui.component.CalendarDayContent
 import com.shub39.grit.core.habits.presentation.ui.component.CalendarMonthHeader
+import com.shub39.grit.core.shared_ui.InputNumberDialog
+import com.shub39.grit.core.shared_ui.NotesDialog
 import com.shub39.grit.core.theme.flexFontEmphasis
 import com.shub39.grit.core.theme.flexFontRounded
 import grit.shared.generated.resources.Res
@@ -76,7 +79,9 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun Calendar(
     state: HabitState,
+    onAction: (HabitsAction) -> Unit,
     onDateClick: (Habit, LocalDate) -> Unit,
+    onDateLongClick: (Habit, LocalDate) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -86,8 +91,10 @@ fun Calendar(
         state.habitsWithAnalytics.find { it.habit.id == state.analyticsHabitId } ?: return
     val windowSizeClass = LocalWindowSizeClass.current
     val today = LocalDate.now()
+    val notesDates =
+        remember(currentHabit.statuses) { currentHabit.statuses.filter { it.hasNotes() }.map { it.date }.toSet() }
     val doneDates =
-        remember(currentHabit.statuses) { currentHabit.statuses.map { it.date }.toSet() }
+        remember(currentHabit.statuses) { currentHabit.statuses.filter { it.isCompleted() }.map { it.date }.toSet() }
     val edgeWeeks = listOf(state.startingDay, daysStartingFrom(state.startingDay).last())
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -140,9 +147,11 @@ fun Calendar(
                         state = state,
                         modifier = modifier,
                         doneDates = doneDates,
+                        notesDates = notesDates,
                         currentHabit = currentHabit,
                         edgeWeeks = edgeWeeks,
                         onDateClick = onDateClick,
+                        onDateLongClick = onDateLongClick,
                     )
                 }
 
@@ -150,14 +159,30 @@ fun Calendar(
                     MonthlyCalendar(
                         state = state,
                         doneDates = doneDates,
+                        notesDates = notesDates,
                         today = today,
                         currentHabit = currentHabit,
                         edgeWeeks = edgeWeeks,
                         onDateClick = onDateClick,
+                        onDateLongClick = onDateLongClick,
                     )
                 }
             }
         }
+    }
+
+    if (state.notesDialog != null) {
+        NotesDialog(
+            state = state.notesDialog,
+            onAction = onAction,
+        )
+    }
+
+    if (state.inputNumberDialog != null) {
+        InputNumberDialog(
+            state = state.inputNumberDialog,
+            onAction = onAction,
+        )
     }
 }
 
@@ -166,10 +191,12 @@ private fun YearlyCalendar(
     today: LocalDate,
     state: HabitState,
     modifier: Modifier,
+    notesDates: Set<LocalDate>,
     doneDates: Set<LocalDate>,
     currentHabit: HabitWithAnalytics,
     edgeWeeks: List<DayOfWeek>,
     onDateClick: (Habit, LocalDate) -> Unit,
+    onDateLongClick: (Habit, LocalDate) -> Unit,
 ) {
     val calendarState =
         rememberYearCalendarState(
@@ -211,10 +238,12 @@ private fun YearlyCalendar(
                 CalendarDayContent(
                     day = day,
                     doneDates = doneDates,
+                    notesDates = notesDates,
                     today = today,
                     habitDays = currentHabit.habit.days,
                     edgeWeeks = edgeWeeks,
                     onDateClick = { onDateClick(currentHabit.habit, it) },
+                    onDateLongClick = { onDateLongClick(currentHabit.habit, it) },
                     height = 20.dp,
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                 )
@@ -227,10 +256,12 @@ private fun YearlyCalendar(
 private fun MonthlyCalendar(
     state: HabitState,
     doneDates: Set<LocalDate>,
+    notesDates: Set<LocalDate>,
     today: LocalDate,
     currentHabit: HabitWithAnalytics,
     edgeWeeks: List<DayOfWeek>,
     onDateClick: (Habit, LocalDate) -> Unit,
+    onDateLongClick: (Habit, LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val calendarState =
@@ -251,10 +282,12 @@ private fun MonthlyCalendar(
             CalendarDayContent(
                 day = day,
                 doneDates = doneDates,
+                notesDates = notesDates,
                 today = today,
                 habitDays = currentHabit.habit.days,
                 edgeWeeks = edgeWeeks,
                 onDateClick = { onDateClick(currentHabit.habit, it) },
+                onDateLongClick = { onDateLongClick(currentHabit.habit, it) },
             )
         },
     )

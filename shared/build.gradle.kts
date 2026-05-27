@@ -45,7 +45,7 @@ kotlin {
         }
     }
 
-    jvm()
+//    jvm()
 
     android {
         namespace = "com.shub39.grit.core"
@@ -55,10 +55,10 @@ kotlin {
         androidResources { enable = true }
     }
 
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
+//    wasmJs {
+//        browser()
+//        binaries.executable()
+//    }
 
     sourceSets {
         commonMain.dependencies {

@@ -31,8 +31,11 @@ import com.shub39.grit.core.tasks.domain.TaskRepo
 import com.shub39.grit.domain.AlarmScheduler
 import com.shub39.grit.habits.data.database.HabitDatabase
 import com.shub39.grit.tasks.data.database.TaskDatabase
-import kotlin.io.path.outputStream
-import kotlin.io.path.readText
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.openFilePicker
+import io.github.vinceglb.filekit.readString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -40,8 +43,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
-import kotlin.io.path.outputStream
-import kotlin.io.path.readText
 
 @Single(binds = [RestoreRepo::class])
 class RestoreImpl(
@@ -64,7 +65,7 @@ class RestoreImpl(
 
             if (
                 jsonDeserialized.tasksSchemaVersion != TaskDatabase.SCHEMA_VERSION ||
-                    jsonDeserialized.habitsSchemaVersion != HabitDatabase.SCHEMA_VERSION
+                jsonDeserialized.habitsSchemaVersion != HabitDatabase.SCHEMA_VERSION
             ) {
                 throw SchemaMismatchException()
             }

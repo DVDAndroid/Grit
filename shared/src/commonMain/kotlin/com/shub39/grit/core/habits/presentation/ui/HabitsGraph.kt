@@ -54,6 +54,7 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import com.shub39.grit.core.LocalWindowSizeClass
 import com.shub39.grit.core.habits.presentation.HabitState
 import com.shub39.grit.core.habits.presentation.HabitsAction
+import com.shub39.grit.core.habits.presentation.habitAction
 import com.shub39.grit.core.habits.presentation.ui.component.HabitListFABs
 import com.shub39.grit.core.habits.presentation.ui.sections.AnalyticsPage
 import com.shub39.grit.core.habits.presentation.ui.sections.Calendar
@@ -65,7 +66,12 @@ import com.shub39.grit.core.navigation.verticalTransitionMetadata
 import com.shub39.grit.core.shared_ui.PageFill
 import com.shub39.grit.core.theme.flexFontEmphasis
 import com.shub39.grit.core.theme.flexFontRounded
-import grit.shared.generated.resources.*
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.collapse
+import grit.shared.generated.resources.completed
+import grit.shared.generated.resources.expand
+import grit.shared.generated.resources.habits
+import grit.shared.generated.resources.reorder
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -195,8 +201,12 @@ fun HabitsGraph(
                             onNavigateBack = {
                                 if (backstack.size != 1) backstack.removeLastOrNull()
                             },
+                            onAction = onAction,
                             onDateClick = { habit, date ->
-                                onAction(HabitsAction.InsertStatus(habit, date))
+                                onAction(habitAction(long = false, habit, date))
+                            },
+                            onDateLongClick = { habit, date ->
+                                onAction(habitAction(long = true, habit, date))
                             },
                             modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                         )
@@ -313,11 +323,15 @@ private fun ExpandedScreen(
                             entry<HabitRoutes.Calendar>(metadata = horizontalTransitionMetadata()) {
                                 Calendar(
                                     state = state,
+                                    onAction = onAction,
+                                    onDateClick = { habit, date ->
+                                        onAction(habitAction(long = false, habit, date))
+                                    },
+                                    onDateLongClick = { habit, date ->
+                                        onAction(habitAction(long = true, habit, date))
+                                    },
                                     onNavigateBack = {
                                         if (backstack.size != 1) backstack.removeLastOrNull()
-                                    },
-                                    onDateClick = { habit, date ->
-                                        onAction(HabitsAction.InsertStatus(habit, date))
                                     },
                                     modifier =
                                         Modifier.background(
@@ -390,7 +404,7 @@ private fun HabitsTopAppBar(
                 Text(
                     text =
                         "${state.completedHabitIds.size}/${state.habitsWithAnalytics.size} " +
-                            stringResource(Res.string.completed),
+                                stringResource(Res.string.completed),
                     fontFamily = flexFontRounded(),
                 )
             }
