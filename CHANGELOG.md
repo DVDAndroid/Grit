@@ -1,5 +1,22 @@
 # Changelog
 
+## 6.0.0
+- Added new Consistency Stat in Habit Analytics
+- Redesigned Weekly Comparison Stat, Displays weekly comparison up to 1 year
+- Miscellaneous UI improvements #291
+- Monthly Progress Stat can be expanded to a calendar view, up to January 2024
+- Fixed Habits being created with no selected days
+- Updated Translations
+- Thanks to everyone for 1000+ stars on GitHub 🙏
+
+## 5.9.25
+- Fix Hebrew Translations not applied by Language Picker
+
+## 5.9.24
+- Updated Translations
+- Added ability to choose export locations for backups
+- Miscellaneous UI improvements
+
 ## 5.9.23
 - Updated Translations
 - (Android 13+) Added ability to change app language from Settings
