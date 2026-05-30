@@ -99,4 +99,7 @@
     <string name="habit_type_yesno">Yes/no</string>
     <string name="habit_type_numeric">Numeric</string>
     <string name="delete_numbervalue">Delete number</string>
+    <string name="progress">Progress</string>
+    <string name="daily">Daily</string>
+    <string name="weekly">Weekly</string>
 </resources>

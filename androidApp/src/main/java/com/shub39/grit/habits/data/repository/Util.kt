@@ -16,6 +16,9 @@
  */
 package com.shub39.grit.habits.data.repository
 
+import com.shub39.grit.core.habits.domain.AnalyticsPeriod
+import com.shub39.grit.core.habits.domain.HabitNumberChange
+import com.shub39.grit.core.habits.domain.HabitNumericAnalytics
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.habits.domain.WeekDayFrequencyData
 import com.shub39.grit.core.habits.domain.WeeklyComparisonData
@@ -28,7 +31,8 @@ import kotlinx.datetime.daysUntil
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import kotlin.time.ExperimentalTime
+import kotlinx.datetime.toJavaLocalDate
+import java.time.temporal.IsoFields
 
 fun countCurrentStreak(
     dates: List<LocalDate>,
@@ -181,4 +185,87 @@ fun calculateConsistency(dates: List<LocalDate>, eligibleWeekdays: Set<DayOfWeek
     }
 
     return if (totalEligibleDays > 0) eligibleDates.size.toFloat() / totalEligibleDays else 0f
+}
+
+fun calculateNumericAnalytics(statuses: List<HabitStatus>): HabitNumericAnalytics {
+    fun numberChange(current: Float, previous: Float?) = when {
+        previous == null -> HabitNumberChange.NumberChange.Equal
+        current > previous -> HabitNumberChange.NumberChange.Increase
+        current < previous -> HabitNumberChange.NumberChange.Decrease
+        else -> HabitNumberChange.NumberChange.Equal
+    }
+
+    val completed = statuses.filter { it.isCompleted() }.sortedByDescending { it.date }
+    val statusesByWeek = completed.groupBy {
+        val d = it.date.toJavaLocalDate()
+        AnalyticsPeriod.Week(
+            year = d.get(IsoFields.WEEK_BASED_YEAR),
+            week = d.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
+        )
+    }
+    val dailyChanges = completed
+        .sortedByDescending { it.date }
+        .mapIndexed { index, current ->
+            val previousValue = completed.getOrNull(index + 1)?.numberValue
+            HabitNumberChange(
+                period = AnalyticsPeriod.Day(current.date),
+                value = current.numberValue?:0f,
+                change = numberChange(current.numberValue ?: 0f, previousValue)
+            )
+        }
+    val avgByWeek = statusesByWeek.mapValues { (_, statuses) ->
+        statuses.mapNotNull { it.numberValue }.average().toFloat()
+    }
+    val sortedWeeks = avgByWeek.entries.sortedByDescending { it.key }
+    val weeklyChanges = sortedWeeks.mapIndexed { index, current ->
+        val previousValue = sortedWeeks.getOrNull(index + 1)?.value
+        HabitNumberChange(
+            period = current.key,
+            value = current.value,
+            change = numberChange(current.value, previousValue)
+        )
+    }
+
+    val statusesByMonth = completed.groupBy {
+        AnalyticsPeriod.Month(year = it.date.year, month = it.date.month)
+    }
+    val avgByMonth = statusesByMonth.mapValues { (_, statuses) ->
+        statuses.mapNotNull { it.numberValue }.average().toFloat()
+    }
+    val sortedMonths = avgByMonth.entries.sortedByDescending { it.key }
+    val monthlyChanges = sortedMonths.mapIndexed { index, current ->
+        val previousValue = sortedMonths.getOrNull(index + 1)?.value
+        HabitNumberChange(
+            period = current.key,
+            value = current.value,
+            change = numberChange(current.value, previousValue)
+        )
+    }
+
+    val avgByYear = completed
+        .groupBy { AnalyticsPeriod.Year(year = it.date.year) }
+        .mapValues { (_, statuses) ->
+            statuses.mapNotNull { it.numberValue }.average().toFloat()
+        }
+    val sortedYears = avgByYear.entries.sortedByDescending { it.key }
+    val yearlyChanges = sortedYears.mapIndexed { index, current ->
+        val previousValue = sortedYears.getOrNull(index + 1)?.value
+        HabitNumberChange(
+            period = current.key,
+            value = current.value,
+            change = numberChange(current.value, previousValue)
+        )
+    }
+
+    return HabitNumericAnalytics(
+//        statusesByWeek = statusesByWeek,
+//        statusesByMonth = statusesByMonth,
+//        avgByWeek = avgByWeek,
+//        avgByMonth = avgByMonth,
+//        avgByYear = avgByYear,
+        dailyChanges = dailyChanges,
+        weeklyChanges = weeklyChanges,
+        monthlyChanges = monthlyChanges,
+        yearlyChanges = yearlyChanges,
+    )
 }

@@ -90,4 +90,7 @@
     <string name="habit_type_yesno">Si/no</string>
     <string name="habit_type_numeric">Numerica</string>
     <string name="delete_numbervalue">Cancella numero</string>
+    <string name="progress">Progresso</string>
+    <string name="daily">Giornaliero</string>
+    <string name="weekly">Settimanale</string>
 </resources>

@@ -22,6 +22,7 @@ import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitRanking
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
+import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.domain.OverallAnalytics
 import com.shub39.grit.core.habits.presentation.StatusHabitAction
@@ -108,6 +109,10 @@ class HabitRepository(
                 habitsFlow.map { habit ->
                     val habitStatusesForHabit = habitStatusesFlow.filter { it.habitId == habit.id }
                     val dates = habitStatusesForHabit.filter { it.isCompleted() }.map { it.date }
+                    val numericAnalytics =
+                        if (habit.type == HabitType.Numeric) calculateNumericAnalytics(
+                            habitStatusesForHabit
+                        ) else null
 
                     HabitWithAnalytics(
                         habit = habit,
@@ -123,6 +128,7 @@ class HabitRepository(
                         weekDayFrequencyData = prepareWeekDayFrequencyData(dates = dates),
                         startedDaysAgo = habit.time.date.daysUntil(LocalDate.now()).toLong(),
                         consistency = calculateConsistency(dates, habit.days),
+                        numericAnalytics = numericAnalytics,
                     )
                 }
             }

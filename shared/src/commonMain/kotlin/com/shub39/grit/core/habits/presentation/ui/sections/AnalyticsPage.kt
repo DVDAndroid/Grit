@@ -71,6 +71,7 @@ import com.shub39.grit.core.habits.presentation.HabitsAction
 import com.shub39.grit.core.habits.presentation.habitAction
 import com.shub39.grit.core.habits.presentation.ui.component.HabitUpsertSheet
 import com.shub39.grit.core.habits.presentation.ui.component.stats.CalendarMap
+import com.shub39.grit.core.habits.presentation.ui.component.stats.NumberValueChangeAnalyticsCard
 import com.shub39.grit.core.habits.presentation.ui.component.stats.StartStats
 import com.shub39.grit.core.habits.presentation.ui.component.stats.WeekDayBreakdown
 import com.shub39.grit.core.habits.presentation.ui.component.stats.WeeklyActivity
@@ -97,6 +98,7 @@ fun AnalyticsPage(
     onNavigateBack: () -> Unit,
     onNavigateToPaywall: () -> Unit,
     onNavigateToCalendar: () -> Unit,
+    onNavigateToFullNumericList: () -> Unit,
     isUserSubscribed: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -209,38 +211,37 @@ fun AnalyticsPage(
                 )
             }
 
+            item {
+                WeeklyBooleanHeatMap(
+                    heatMapState = heatMapState,
+                    statuses = currentHabit.statuses,
+                    days = currentHabit.habit.days,
+                    onDateClick = {
+                        onAction(habitAction(long = false, currentHabit.habit, it))
+                    },
+                    onDateLongClick = {
+                        onAction(habitAction(long = true, currentHabit.habit, it))
+                    },
+                )
+            }
+            item {
+                CalendarMap(
+                    canSeeContent = isUserSubscribed,
+                    calendarState = calendarState,
+                    onNavigateToPaywall = onNavigateToPaywall,
+                    statuses = currentHabit.statuses,
+                    days = currentHabit.habit.days,
+                    onNavigateToCalendar = onNavigateToCalendar,
+                    onDateClick = {
+                        onAction(habitAction(long = false, currentHabit.habit, it))
+                    },
+                    onDateLongClick = {
+                        onAction(habitAction(long = true, currentHabit.habit, it))
+                    },
+                )
+            }
+
             if (currentHabit.habit.type == HabitType.Boolean) {
-                item {
-
-                    WeeklyBooleanHeatMap(
-                        heatMapState = heatMapState,
-                        statuses = currentHabit.statuses,
-                        days = currentHabit.habit.days,
-                        onDateClick = {
-                            onAction(habitAction(long = false, currentHabit.habit, it))
-                        },
-                        onDateLongClick = {
-                            onAction(habitAction(long = true, currentHabit.habit, it))
-                        },
-                    )
-                }
-                item {
-                    CalendarMap(
-                        canSeeContent = isUserSubscribed,
-                        calendarState = calendarState,
-                        onNavigateToPaywall = onNavigateToPaywall,
-                        statuses = currentHabit.statuses,
-                        days = currentHabit.habit.days,
-                        onNavigateToCalendar = onNavigateToCalendar,
-                        onDateClick = {
-                            onAction(habitAction(long = false, currentHabit.habit, it))
-                        },
-                        onDateLongClick = {
-                            onAction(habitAction(long = true, currentHabit.habit, it))
-                        },
-                    )
-                }
-
                 item {
                     WeeklyActivity(
                         lineChartData = currentHabit.weeklyComparisonData,
@@ -257,8 +258,12 @@ fun AnalyticsPage(
                     )
                 }
             } else {
+                checkNotNull(currentHabit.numericAnalytics)
                 item {
-                    Text("numeric")
+                    NumberValueChangeAnalyticsCard(
+                        habit = currentHabit,
+                        onNavigateToFullNumericList = onNavigateToFullNumericList,
+                    )
                 }
             }
         }

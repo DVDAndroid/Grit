@@ -60,6 +60,7 @@ import com.shub39.grit.core.habits.presentation.ui.sections.AnalyticsPage
 import com.shub39.grit.core.habits.presentation.ui.sections.Calendar
 import com.shub39.grit.core.habits.presentation.ui.sections.CalendarHeatMap
 import com.shub39.grit.core.habits.presentation.ui.sections.HabitsList
+import com.shub39.grit.core.habits.presentation.ui.sections.NumberValuesFullList
 import com.shub39.grit.core.habits.presentation.ui.sections.OverallAnalytics
 import com.shub39.grit.core.navigation.horizontalTransitionMetadata
 import com.shub39.grit.core.navigation.verticalTransitionMetadata
@@ -87,8 +88,9 @@ private sealed interface HabitRoutes : NavKey {
     @Serializable data object OverallAnalytics : HabitRoutes
 
     @Serializable data object Calendar : HabitRoutes
-
     @Serializable data object CalendarHeatMap : HabitRoutes
+
+    @Serializable data object NumericFullList : HabitRoutes
 }
 
 private val config = SavedStateConfiguration {
@@ -174,6 +176,7 @@ fun HabitsGraph(
                             },
                             onNavigateToPaywall = onNavigateToPaywall,
                             onNavigateToCalendar = { backstack.add(HabitRoutes.Calendar) },
+                            onNavigateToFullNumericList = { backstack.add(HabitRoutes.NumericFullList) },
                             isUserSubscribed = isUserSubscribed,
                             modifier = Modifier.background(MaterialTheme.colorScheme.background),
                         )
@@ -222,6 +225,16 @@ fun HabitsGraph(
                             onChangeSelectedDay = {
                                 onAction(HabitsAction.FetchCompletedHabitsForDate(it))
                             },
+                        )
+                    }
+
+                    entry<HabitRoutes.NumericFullList>(metadata = horizontalTransitionMetadata()) {
+                        NumberValuesFullList(
+                            state = state,
+                            onNavigateBack = {
+                                if (backstack.size != 1) backstack.removeLastOrNull()
+                            },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                         )
                     }
                 },
@@ -312,6 +325,7 @@ private fun ExpandedScreen(
                                     },
                                     onNavigateToPaywall = onNavigateToPaywall,
                                     onNavigateToCalendar = { backstack.add(HabitRoutes.Calendar) },
+                                    onNavigateToFullNumericList = { backstack.add(HabitRoutes.NumericFullList) },
                                     isUserSubscribed = isUserSubscribed,
                                     modifier =
                                         Modifier.background(
