@@ -41,6 +41,7 @@ interface HabitRepo {
     suspend fun getStatusForHabit(id: Long): List<HabitStatus>
 
     suspend fun getStatusByHabitAndDate(habitId: Long, date: LocalDate): HabitStatus?
+    suspend fun getStatusByHabitAndDatePrevious(habitId: Long, date: LocalDate): HabitStatus?
 
     suspend fun upsertHabitStatus(habitStatus: HabitStatus)
 

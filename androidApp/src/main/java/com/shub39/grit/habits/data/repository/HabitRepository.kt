@@ -194,6 +194,10 @@ class HabitRepository(
         return habitStatusDao.getStatusByIdForHabit(habitId, date)?.toHabitStatus()
     }
 
+    override suspend fun getStatusByHabitAndDatePrevious(habitId: Long, date: LocalDate): HabitStatus? {
+        return habitStatusDao.getStatusByHabitAndDatePrevious(habitId, date)?.toHabitStatus()
+    }
+
     override suspend fun upsertHabitStatus(habitStatus: HabitStatus) {
         habitStatusDao.upsertHabitStatus(habitStatus.toHabitStatusEntity())
     }

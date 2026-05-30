@@ -28,6 +28,10 @@ class HabitRepoMock : HabitRepo {
         TODO("Not yet implemented")
     }
 
+    override suspend fun getStatusByHabitAndDatePrevious(habitId: Long, date: LocalDate): HabitStatus? {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun upsertHabit(habit: Habit) {
         habitList.removeAll { it.id == habit.id }
         habitList += habit

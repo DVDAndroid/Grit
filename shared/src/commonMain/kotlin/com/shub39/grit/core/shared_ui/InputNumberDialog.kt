@@ -68,25 +68,24 @@ fun InputNumberDialog(
     var inputText by remember { mutableStateOf(state.numberValue.toString()) }
     var scrollInputMode by remember { mutableStateOf(true) }
 
-    val numbers = remember(selectedNumber) {
+    val numbers = remember(inputText) {
         FloatArray(NUMBER_TOTAL) { i ->
             val centerIndex = NUMBER_TOTAL / 2
             val offset = i - centerIndex
-            round(((selectedNumber ?: 0f) + offset * NUMBER_STEP) * 10) / 10
+            round(((inputText.toFloatOrNull() ?: 0f) + offset * NUMBER_STEP) * 10) / 10
         }
     }
 
-    LaunchedEffect(Unit) {
-        selectedNumber = state.numberValue
+    val scrollFieldState = rememberScrollFieldState(numbers.size, numbers.size / 2)
+
+    fun selNum (): Float = if (scrollInputMode) {
+        numbers[scrollFieldState.selectedOption]
+    } else {
+        inputText.toFloatOrNull() ?: 0f
     }
 
-    fun text2Number() {
-        inputText.toFloatOrNull()?.let { selectedNumber = it }
-    }
     LaunchedEffect(scrollInputMode) {
-        if (scrollInputMode) {
-            text2Number()
-        } else {
+        if (!scrollInputMode) {
             inputText = selectedNumber.toString()
 
             delay(150)
@@ -95,20 +94,8 @@ fun InputNumberDialog(
         }
     }
 
-    LaunchedEffect(selectedNumber) {
-        inputText = selectedNumber.toString()
-    }
-
-    val scrollFieldState = rememberScrollFieldState(
-        numbers.size,
-        numbers.size / 2
-    )
-
     LaunchedEffect(numbers) {
         scrollFieldState.scrollToOption(numbers.size / 2)
-    }
-    LaunchedEffect(scrollFieldState.selectedOption) {
-        selectedNumber = numbers[scrollFieldState.selectedOption]
     }
 
     AlertDialog(
@@ -165,6 +152,7 @@ fun InputNumberDialog(
 
                     IconButton(
                         onClick = {
+                            selectedNumber = selNum()
                             scrollInputMode = !scrollInputMode
                         },
                         modifier = Modifier
@@ -217,13 +205,11 @@ fun InputNumberDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    text2Number()
-
                     onAction(
                         StatusHabitAction.SaveNumberDialog(
                             habit = state.habit,
                             date = state.date,
-                            numberValue = selectedNumber,
+                            numberValue = selNum(),
                         )
                     )
                 },

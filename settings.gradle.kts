@@ -18,6 +18,12 @@ rootProject.name = "Grit"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
+buildCache {
+    local {
+        directory = file(".kotlin/build-cache")
+    }
+}
+
 pluginManagement {
     repositories {
         google {

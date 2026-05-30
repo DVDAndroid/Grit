@@ -126,17 +126,21 @@ class HabitViewModel(
                 }
 
                 is HabitsAction.ShowDialog -> {
+                    val status = repo.getStatusByHabitAndDate(
+                        action.habit.id,
+                        action.date
+                    )
+                    val lastStatus = repo.getStatusByHabitAndDatePrevious(
+                        action.habit.id,
+                        action.date
+                    )
+                    val dialogStatusInfo = HabitDialogStatusInfo(
+                        habit = action.habit,
+                        date = action.date,
+                        numberValue = status?.numberValue ?: lastStatus?.numberValue,
+                        notes = status?.notes.orEmpty(),
+                    )
                     _state.update {
-                        val status = repo.getStatusByHabitAndDate(
-                            action.habit.id,
-                            action.date
-                        )
-                        val dialogStatusInfo = HabitDialogStatusInfo(
-                            habit = action.habit,
-                            date = action.date,
-                            numberValue = status?.numberValue,
-                            notes = status?.notes.orEmpty(),
-                        )
                         when (action.dialogMode) {
                             StatusHabitDialogMode.Notes -> it.copy(notesDialog = dialogStatusInfo)
                             StatusHabitDialogMode.NumberValue -> it.copy(inputNumberDialog = dialogStatusInfo)

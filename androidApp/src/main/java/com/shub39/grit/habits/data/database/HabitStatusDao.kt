@@ -20,7 +20,6 @@ import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
-import androidx.room3.Update
 import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
@@ -45,6 +44,9 @@ interface HabitStatusDao {
 
     @Query("SELECT * FROM habit_status WHERE habitId = :habitId AND date = :date LIMIT 1")
     suspend fun getStatusByIdForHabit(habitId: Long, date: LocalDate): HabitStatusEntity?
+
+    @Query("SELECT * FROM habit_status WHERE habitId = :habitId AND date < :date ORDER BY date DESC LIMIT 1")
+    suspend fun getStatusByHabitAndDatePrevious(habitId: Long, date: LocalDate): HabitStatusEntity?
 
     @Query("DELETE FROM habit_status WHERE habitId = :habitId AND date = :date")
     suspend fun deleteStatus(habitId: Long, date: LocalDate)
