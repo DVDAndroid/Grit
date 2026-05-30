@@ -265,10 +265,10 @@ suspend fun HabitRepo.upsertLogic(action: StatusHabitAction) {
             if (notes != null) {
                 upsertHabitStatus(oldStatus.copy(notes = notes))
             } else {
-                if (oldStatus.numberValue != null) {
-                    upsertHabitStatus(oldStatus.copy(notes = null))
-                } else {
+                if (oldStatus.ok == HabitCompletion.OnlyNotes) {
                     deleteHabitStatus(habit.id, date)
+                } else {
+                    upsertHabitStatus(oldStatus.copy(notes = null))
                 }
             }
         }

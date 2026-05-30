@@ -182,6 +182,10 @@ class UpsertStatusLogicTest {
 
         var s = status()
         assert(s != null)
+        requireNotNull(s)
+        assert(s.ok == HabitCompletion.Completed)
+        assert(s.notes == null)
+        assert(s.numberValue == null)
         repo.upsertLogic(
             StatusHabitAction.SaveNoteDialog(
                 habit = habit,
@@ -206,7 +210,11 @@ class UpsertStatusLogicTest {
         )
 
         s = status()
-        assert(s == null)
+        assert(s != null)
+        requireNotNull(s)
+        assert(s.ok == HabitCompletion.Completed)
+        assert(s.notes == null)
+        assert(s.numberValue == null)
     }
 
     // 1.long click su habit solo per aggiungere note, tipo bool
@@ -438,6 +446,10 @@ class UpsertStatusLogicTest {
 
         var s = status()
         assert(s != null)
+        requireNotNull(s)
+        assert(s.ok == HabitCompletion.Completed)
+        assert(s.notes == null)
+        assert(s.numberValue == 1f)
         repo.upsertLogic(
             StatusHabitAction.SaveNoteDialog(
                 habit = habit,
