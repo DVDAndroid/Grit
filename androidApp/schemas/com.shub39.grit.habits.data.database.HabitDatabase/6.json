@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "33d7a3f0f4c8a4b7495574f5ee86a7dd",
+    "identityHash": "3559e6bd217d30cb71733bce4c50d34a",
     "entities": [
       {
         "tableName": "habit_index",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `index` INTEGER NOT NULL, `days` TEXT NOT NULL, `time` INTEGER NOT NULL, `reminder` INTEGER NOT NULL DEFAULT 1, `type` TEXT NOT NULL DEFAULT 'boolean')",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `index` INTEGER NOT NULL, `days` TEXT NOT NULL, `time` INTEGER NOT NULL, `reminder` INTEGER NOT NULL DEFAULT 1, `type` TEXT NOT NULL DEFAULT 'boolean', `updatedAt` INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP)",
         "fields": [
           {
             "fieldPath": "id",
@@ -57,6 +57,13 @@
             "affinity": "TEXT",
             "notNull": true,
             "defaultValue": "'boolean'"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "CURRENT_TIMESTAMP"
           }
         ],
         "primaryKey": {
@@ -68,7 +75,7 @@
       },
       {
         "tableName": "habit_status",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `habitId` INTEGER NOT NULL, `date` INTEGER NOT NULL, `ok` INTEGER NOT NULL DEFAULT 1, `notes` TEXT, `numberValue` REAL, FOREIGN KEY(`habitId`) REFERENCES `habit_index`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `habitId` INTEGER NOT NULL, `date` INTEGER NOT NULL, `ok` INTEGER NOT NULL DEFAULT 1, `notes` TEXT, `numberValue` REAL, `updatedAt` INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(`habitId`) REFERENCES `habit_index`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -104,6 +111,13 @@
             "fieldPath": "numberValue",
             "columnName": "numberValue",
             "affinity": "REAL"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "CURRENT_TIMESTAMP"
           }
         ],
         "primaryKey": {
@@ -141,7 +155,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '33d7a3f0f4c8a4b7495574f5ee86a7dd')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3559e6bd217d30cb71733bce4c50d34a')"
     ]
   }
 }

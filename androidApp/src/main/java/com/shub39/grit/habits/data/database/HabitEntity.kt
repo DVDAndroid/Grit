@@ -33,4 +33,9 @@ data class HabitEntity(
     val time: LocalDateTime,
     @ColumnInfo(name = "reminder", defaultValue = "1") val reminder: Boolean,
     @ColumnInfo(name = "type", defaultValue = "boolean") val type: HabitType,
+    @ColumnInfo(
+        name = "updatedAt",
+        defaultValue = "CURRENT_TIMESTAMP",
+    )
+    val updatedAt: LocalDateTime,
 )

@@ -17,6 +17,7 @@
 package com.shub39.grit.core.habits.domain
 
 import androidx.compose.runtime.Stable
+import com.shub39.grit.core.now
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
@@ -32,4 +33,5 @@ data class Habit(
     val index: Int,
     val reminder: Boolean,
     val type: HabitType,
+    private val updatedAt: LocalDateTime = LocalDateTime.now(),
 )

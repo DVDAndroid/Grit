@@ -23,6 +23,7 @@ import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import com.shub39.grit.core.habits.domain.HabitCompletion
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 
 @Entity(
     tableName = "habit_status",
@@ -43,7 +44,17 @@ data class HabitStatusEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val habitId: Long,
     val date: LocalDate,
-    @ColumnInfo(name = "ok", defaultValue = "1", typeAffinity = ColumnInfo.INTEGER) val ok: HabitCompletion = HabitCompletion.Completed,
+    @ColumnInfo(
+        name = "ok",
+        defaultValue = "1",
+        typeAffinity = ColumnInfo.INTEGER,
+    )
+    val ok: HabitCompletion = HabitCompletion.Completed,
     val notes: String? = null,
     val numberValue: Float? = null,
+    @ColumnInfo(
+        name = "updatedAt",
+        defaultValue = "CURRENT_TIMESTAMP",
+    )
+    val updatedAt: LocalDateTime,
 )
