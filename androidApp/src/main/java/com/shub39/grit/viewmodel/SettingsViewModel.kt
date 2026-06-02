@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shub39.grit.core.habits.domain.SyncQueueRepo
 import com.shub39.grit.core.settings.domain.backup.ExportRepo
 import com.shub39.grit.core.settings.domain.backup.ExportState
 import com.shub39.grit.core.settings.domain.backup.RestoreRepo
@@ -52,6 +53,7 @@ class SettingsViewModel(
     private val themeDatastore: ThemeDatastore,
     private val settingsDatastore: SettingsDatastore,
     private val changelogManager: ChangelogManager,
+    private val syncRepo: SyncQueueRepo,
     private val biometricUtils: BiometricUtils,
 ) : ViewModel() {
     private var observeJob: Job? = null
@@ -65,6 +67,7 @@ class SettingsViewModel(
                 observeJob()
                 getChangeLogs()
                 getBiometricStatus()
+                getSyncQueueSize()
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SettingsState())
 
@@ -143,12 +146,42 @@ class SettingsViewModel(
 
                 is SettingsAction.ChangeReorderTasks ->
                     settingsDatastore.setTaskReorderPref(action.pref)
+
+                is SettingsAction.ChangeSyncServerUrl ->
+                    settingsDatastore.updateSyncServerUrl(action.url.takeIf { it.isNotBlank() })
+
+                SettingsAction.ElaborateQueue -> {
+                    _state.update {
+                        it.copy(syncState = it.syncState.copy(busyElaborating = true))
+                    }
+                    syncRepo.elaborateQueue()
+                    getSyncQueueSize()
+                    _state.update {
+                        it.copy(syncState = it.syncState.copy(busyElaborating = false))
+                    }
+                }
+
+                SettingsAction.ImportAllFromServer -> {
+                    _state.update {
+                        it.copy(syncState = it.syncState.copy(busyImporting = true))
+                    }
+                    syncRepo.importAll()
+                    _state.update {
+                        it.copy(syncState = it.syncState.copy(busyImporting = false))
+                    }
+                }
             }
         }
 
     private fun getBiometricStatus() {
         _state.update {
             it.copy(isBiometricLockAvailable = biometricUtils.authenticationAvailable())
+        }
+    }
+
+    private suspend fun getSyncQueueSize() {
+        _state.update {
+            it.copy(syncState = it.syncState.copy(queueSize = syncRepo.getJobs().size))
         }
     }
 
@@ -236,6 +269,11 @@ class SettingsViewModel(
                 settingsDatastore
                     .getBiometricLockPref()
                     .onEach { flow -> _state.update { it.copy(isBiometricLockOn = flow) } }
+                    .launchIn(this)
+
+                settingsDatastore
+                    .getSyncServerUrl()
+                    .onEach { flow -> _state.update { it.copy(syncState = it.syncState.copy(url = flow)) } }
                     .launchIn(this)
             }
         }

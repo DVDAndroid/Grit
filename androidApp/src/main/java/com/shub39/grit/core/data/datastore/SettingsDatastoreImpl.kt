@@ -40,6 +40,7 @@ class SettingsDatastoreImpl(private val datastore: DataStore<Preferences>) : Set
         private val taskReorderKey = booleanPreferencesKey("task_reorder")
         private val compactHabitView = booleanPreferencesKey("compact_habit_view")
         private val lastChangelogShownKey = stringPreferencesKey("last_changelog_shown")
+        private val syncServerUrl = stringPreferencesKey("sync_server_url")
     }
 
     override fun getStartOfTheWeekPref(): Flow<DayOfWeek> =
@@ -103,4 +104,13 @@ class SettingsDatastoreImpl(private val datastore: DataStore<Preferences>) : Set
     override suspend fun updateLastChangelogShown(version: String) {
         datastore.edit { settings -> settings[lastChangelogShownKey] = version }
     }
+
+    override fun getSyncServerUrl(): Flow<String?> =
+        datastore.data.map { prefs -> prefs[syncServerUrl].orEmpty().takeIf { it.isNotBlank() } }
+
+    override suspend fun updateSyncServerUrl(version: String?) {
+        datastore.edit { settings -> settings[syncServerUrl] = version ?: "" }
+    }
+
+
 }

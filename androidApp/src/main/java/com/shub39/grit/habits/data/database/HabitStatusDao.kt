@@ -37,7 +37,7 @@ interface HabitStatusDao {
     suspend fun insertHabitStatus(habitStatusEntity: HabitStatusEntity)
 
     @Upsert
-    suspend fun upsertHabitStatus(habitStatusEntity: HabitStatusEntity)
+    suspend fun upsertHabitStatus(habitStatusEntity: HabitStatusEntity): Long
 
     @Query("SELECT * FROM habit_status WHERE habitId = :habitId")
     suspend fun getStatusForHabit(habitId: Long): List<HabitStatusEntity>

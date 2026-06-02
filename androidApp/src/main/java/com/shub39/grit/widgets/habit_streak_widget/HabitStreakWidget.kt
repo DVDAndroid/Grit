@@ -68,12 +68,11 @@ import com.shub39.grit.core.habits.domain.Habit
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
-import com.shub39.grit.core.now
 import com.shub39.grit.widgets.WidgetSize
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDateTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import kotlin.time.Clock
 
 /** Habit streak widget, shows current and best streak of a habit */
 class HabitStreakWidget : GlanceAppWidget(), KoinComponent {
@@ -135,7 +134,7 @@ class HabitStreakWidget : GlanceAppWidget(), KoinComponent {
                                 id = 1,
                                 title = "Exercise",
                                 description = "40 mins daily",
-                                time = LocalDateTime.now(),
+                                time = Clock.System.now(),
                                 days = setOf(),
                                 index = 1,
                                 reminder = false,
@@ -487,7 +486,7 @@ private fun GlancePreview() {
                         id = 1,
                         title = "Test Habit",
                         description = "A Test Habit",
-                        time = LocalDateTime.now(),
+                        time = Clock.System.now(),
                         days = setOf(),
                         index = 1,
                         reminder = false,

@@ -16,13 +16,20 @@
  */
 package com.shub39.grit.core
 
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 // Frequently used time utils
 
@@ -32,3 +39,21 @@ fun LocalDateTime.Companion.now(): LocalDateTime =
 fun LocalDate.Companion.now(): LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
 fun LocalTime.Companion.now(): LocalTime = LocalDateTime.now().time
+
+
+object InstantSerializer : KSerializer<Instant> {
+
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Instant) {
+        encoder.encodeString(value.toString())
+    }
+
+    override fun deserialize(decoder: Decoder): Instant {
+        return Instant.parse(decoder.decodeString())
+    }
+}
+
+fun Instant.date(): LocalDate = this.toLocalDateTime(TimeZone.currentSystemDefault()).date
+fun Instant.time(): LocalTime = this.toLocalDateTime(TimeZone.currentSystemDefault()).time

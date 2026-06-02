@@ -21,11 +21,8 @@ import com.shub39.grit.core.habits.domain.Habit
 import com.shub39.grit.core.habits.domain.HabitStatus
 import com.shub39.grit.core.tasks.domain.Category
 import com.shub39.grit.core.tasks.domain.Task
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 
 @OptIn(ExperimentalTime::class)
 fun Habit.toHabitSchema(): HabitSchema {
@@ -34,10 +31,11 @@ fun Habit.toHabitSchema(): HabitSchema {
         title = title,
         description = description,
         index = index,
-        time = time.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds(),
+        time = time.toEpochMilliseconds(),
         days = Converters.dayOfWeekToString(days),
         reminder = reminder,
         type = type,
+        updatedAt = updatedAt.toEpochMilliseconds()
     )
 }
 
@@ -48,7 +46,7 @@ fun HabitSchema.toHabit(): Habit {
         title = title,
         description = description,
         index = index,
-        time = Instant.fromEpochMilliseconds(time).toLocalDateTime(TimeZone.currentSystemDefault()),
+        time = Converters.longToInstant(time) ?: Clock.System.now(),
         days = Converters.dayOfWeekFromString(days),
         reminder = reminder,
         type = type,
@@ -59,10 +57,11 @@ fun HabitStatus.toHabitStatusSchema(): HabitStatusSchema {
     return HabitStatusSchema(
         id = id,
         habitId = habitId,
-        date = Converters.dayToTimestamp(date),
+        date = Converters.dateToDateString(date),
         ok = ok,
         notes = notes,
-        numberValue = numberValue
+        numberValue = numberValue,
+        updatedAt = updatedAt.toEpochMilliseconds(),
     )
 }
 
@@ -70,7 +69,7 @@ fun HabitStatusSchema.toHabitStatus(): HabitStatus {
     return HabitStatus(
         id = id,
         habitId = habitId,
-        date = Converters.dayFromTimestamp(date),
+        date = Converters.dateStringToDate(date),
         ok = ok,
         notes = notes,
         numberValue = numberValue

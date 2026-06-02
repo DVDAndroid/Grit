@@ -37,7 +37,6 @@ import com.shub39.grit.core.habits.presentation.HabitState
 import com.shub39.grit.core.habits.presentation.HabitsAction
 import com.shub39.grit.core.habits.presentation.ui.component.HabitCard
 import com.shub39.grit.core.habits.presentation.ui.component.HabitUpsertSheet
-import com.shub39.grit.core.now
 import com.shub39.grit.core.shared_ui.Empty
 import com.shub39.grit.core.shared_ui.InputNumberDialog
 import com.shub39.grit.core.shared_ui.NotesDialog
@@ -45,12 +44,13 @@ import com.shub39.grit.core.shared_ui.detachedItemShape
 import com.shub39.grit.core.shared_ui.endItemShape
 import com.shub39.grit.core.shared_ui.leadingItemShape
 import com.shub39.grit.core.shared_ui.middleItemShape
-import grit.shared.generated.resources.*
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.drag_indicator
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.vectorResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import kotlin.time.Clock
 
 @Composable
 fun HabitsList(
@@ -136,7 +136,7 @@ fun HabitsList(
                 Habit(
                     title = "",
                     description = "",
-                    time = LocalDateTime.now(),
+                    time = Clock.System.now(),
                     days = DayOfWeek.entries.toSet(),
                     index = state.habitsWithAnalytics.size,
                     reminder = false,

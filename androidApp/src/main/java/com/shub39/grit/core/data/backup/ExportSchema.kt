@@ -42,15 +42,17 @@ data class HabitSchema(
     val days: String,
     val reminder: Boolean,
     val type: HabitType,
+    val updatedAt: Long,
 )
 
 @Serializable data class HabitStatusSchema(
     val id: Long = 0,
     val habitId: Long,
-    val date: Long,
+    val date: String,
     val ok: HabitCompletion,
     val notes: String?,
-    val numberValue: Float?
+    val numberValue: Float?,
+    val updatedAt: Long,
 )
 
 @Serializable

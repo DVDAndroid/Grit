@@ -22,8 +22,10 @@ import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import com.shub39.grit.core.habits.domain.HabitCompletion
+import com.shub39.grit.core.habits.domain.HabitCompletionSerializer
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 @Entity(
     tableName = "habit_status",
@@ -40,6 +42,7 @@ import kotlinx.datetime.LocalDateTime
         Index(value = ["habitId", "date"], unique = true)
     ],
 )
+@Serializable
 data class HabitStatusEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val habitId: Long,
@@ -49,12 +52,13 @@ data class HabitStatusEntity(
         defaultValue = "1",
         typeAffinity = ColumnInfo.INTEGER,
     )
+    @Serializable(with = HabitCompletionSerializer::class)
     val ok: HabitCompletion = HabitCompletion.Completed,
     val notes: String? = null,
     val numberValue: Float? = null,
     @ColumnInfo(
-        name = "updatedAt",
+        name = "updated_at",
         defaultValue = "CURRENT_TIMESTAMP",
     )
-    val updatedAt: LocalDateTime,
+    val updatedAt: Instant,
 )

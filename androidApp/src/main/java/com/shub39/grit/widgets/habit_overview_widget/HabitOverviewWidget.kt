@@ -69,9 +69,9 @@ import com.shub39.grit.core.now
 import com.shub39.grit.widgets.WidgetSize
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -130,7 +130,7 @@ class HabitOverviewWidget : GlanceAppWidget(), KoinComponent {
                     id = 1,
                     title = "Read a Book",
                     description = "20 pages at least",
-                    time = LocalDateTime.now(),
+                    time = Clock.System.now(),
                     days = emptySet(),
                     index = 1,
                     reminder = false,
@@ -140,7 +140,7 @@ class HabitOverviewWidget : GlanceAppWidget(), KoinComponent {
                     id = 2,
                     title = "Exercise",
                     description = "40 Minutes daily",
-                    time = LocalDateTime.now(),
+                    time = Clock.System.now(),
                     days = setOf(),
                     index = 2,
                     reminder = false,
@@ -319,7 +319,7 @@ private fun GlancePreview() {
                     id = it.toLong(),
                     title = "Habit $it",
                     description = "Habit Description $it",
-                    time = LocalDateTime.now(),
+                    time = Clock.System.now(),
                     days = emptySet(),
                     index = it,
                     reminder = false,

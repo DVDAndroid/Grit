@@ -28,13 +28,14 @@ import com.shub39.grit.core.now
 import com.shub39.grit.core.tasks.domain.Task
 import com.shub39.grit.domain.AlarmScheduler
 import com.shub39.grit.domain.IntentActions
-import kotlin.time.ExperimentalTime
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import org.koin.core.annotation.Single
+import kotlin.time.ExperimentalTime
 
 // implementation of AlarmScheduler using AlarmManager
 @Single(binds = [AlarmScheduler::class])
@@ -51,12 +52,12 @@ class NotificationAlarmScheduler(private val context: Context) : AlarmScheduler 
         cancel(habit)
         if (!habit.reminder || habit.days.isEmpty()) return
 
-        var scheduleTime = habit.time
-        val now = LocalDateTime.Companion.now()
+        var scheduleTime = habit.time.toLocalDateTime(TimeZone.currentSystemDefault())
+        val now = LocalDateTime.now()
 
         while ((scheduleTime < now) || !habit.days.contains(scheduleTime.dayOfWeek)) {
             scheduleTime =
-                scheduleTime.date.plus(1, DateTimeUnit.Companion.DAY).let {
+                scheduleTime.date.plus(1, DateTimeUnit.DAY).let {
                     LocalDateTime(date = it, time = scheduleTime.time)
                 }
         }
@@ -77,7 +78,7 @@ class NotificationAlarmScheduler(private val context: Context) : AlarmScheduler 
 
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
-            scheduleTime.toInstant(TimeZone.Companion.currentSystemDefault()).toEpochMilliseconds(),
+            scheduleTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds(),
             pendingIntent,
         )
 
@@ -89,7 +90,7 @@ class NotificationAlarmScheduler(private val context: Context) : AlarmScheduler 
         if (task.reminder == null) return
         val scheduleTime = task.reminder!!
 
-        val now = LocalDateTime.Companion.now()
+        val now = LocalDateTime.now()
 
         if (scheduleTime < now) {
             Log.d(TAG, "Task '${task.title}' reminder time is in the past")
@@ -112,7 +113,7 @@ class NotificationAlarmScheduler(private val context: Context) : AlarmScheduler 
 
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
-            scheduleTime.toInstant(TimeZone.Companion.currentSystemDefault()).toEpochMilliseconds(),
+            scheduleTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds(),
             pendingIntent,
         )
 

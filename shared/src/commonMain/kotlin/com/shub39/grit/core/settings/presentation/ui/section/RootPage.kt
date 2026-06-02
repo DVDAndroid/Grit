@@ -53,7 +53,34 @@ import com.shub39.grit.core.shared_ui.leadingItemShape
 import com.shub39.grit.core.shared_ui.listItemColors
 import com.shub39.grit.core.shared_ui.middleItemShape
 import com.shub39.grit.core.theme.flexFontEmphasis
-import grit.shared.generated.resources.*
+import grit.shared.generated.resources.Res
+import grit.shared.generated.resources.about
+import grit.shared.generated.resources.arrow_forward
+import grit.shared.generated.resources.backup
+import grit.shared.generated.resources.backup_desc
+import grit.shared.generated.resources.biometric_lock
+import grit.shared.generated.resources.biometric_lock_desc
+import grit.shared.generated.resources.changelog
+import grit.shared.generated.resources.check_list
+import grit.shared.generated.resources.download
+import grit.shared.generated.resources.grit_icon
+import grit.shared.generated.resources.grit_plus
+import grit.shared.generated.resources.info
+import grit.shared.generated.resources.look_and_feel
+import grit.shared.generated.resources.look_and_feel_desc
+import grit.shared.generated.resources.palette
+import grit.shared.generated.resources.pause_notifications
+import grit.shared.generated.resources.pause_notifications_desc
+import grit.shared.generated.resources.reorder_tasks
+import grit.shared.generated.resources.reorder_tasks_desc
+import grit.shared.generated.resources.settings
+import grit.shared.generated.resources.show_habits
+import grit.shared.generated.resources.show_habits_desc
+import grit.shared.generated.resources.staring_day
+import grit.shared.generated.resources.sync
+import grit.shared.generated.resources.sync_desc
+import grit.shared.generated.resources.use_24Hr
+import grit.shared.generated.resources.use_24Hr_desc
 import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -68,6 +95,7 @@ fun RootPage(
     onNavigateToPaywall: () -> Unit,
     onNavigateToChangelog: () -> Unit,
     onNavigateToAppInfo: () -> Unit,
+    onNavigateToSync: () -> Unit,
 ) {
     var showLocalePicker by remember { mutableStateOf(false) }
 
@@ -257,6 +285,30 @@ fun RootPage(
                     )
 
                     ListItem(
+                        modifier =
+                            Modifier.clip(middleItemShape()).clickable {
+                                onNavigateToSync()
+                            },
+                        headlineContent = { Text(text = stringResource(Res.string.sync)) },
+                        supportingContent = {
+                            Text(text = stringResource(Res.string.sync_desc))
+                        },
+                        trailingContent = {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.arrow_forward),
+                                contentDescription = "Navigate",
+                            )
+                        },
+                        leadingContent = {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.sync),
+                                contentDescription = "Navigate",
+                            )
+                        },
+                        colors = listItemColors(),
+                    )
+
+                    ListItem(
                         modifier = Modifier.clip(endItemShape()).clickable { onNavigateToBackup() },
                         colors = listItemColors(),
                         headlineContent = { Text(text = stringResource(Res.string.backup)) },
@@ -347,5 +399,6 @@ private fun Preview() {
         onNavigateToPaywall = {},
         onNavigateToChangelog = {},
         onNavigateToAppInfo = {},
+        onNavigateToSync = {},
     )
 }

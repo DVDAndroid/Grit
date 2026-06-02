@@ -21,21 +21,23 @@ import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 import com.shub39.grit.core.habits.domain.HabitType
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 @Entity(tableName = "habit_index")
+@Serializable
 data class HabitEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val title: String,
     val description: String,
     val index: Int,
     val days: Set<DayOfWeek>,
-    val time: LocalDateTime,
+    val time: Instant,
     @ColumnInfo(name = "reminder", defaultValue = "1") val reminder: Boolean,
     @ColumnInfo(name = "type", defaultValue = "boolean") val type: HabitType,
     @ColumnInfo(
-        name = "updatedAt",
+        name = "updated_at",
         defaultValue = "CURRENT_TIMESTAMP",
     )
-    val updatedAt: LocalDateTime,
+    val updatedAt: Instant,
 )

@@ -68,10 +68,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.shub39.grit.core.date
 import com.shub39.grit.core.habits.domain.Habit
 import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.presentation.formatDateWithOrdinal
-import com.shub39.grit.core.now
 import com.shub39.grit.core.shared_ui.ExpressiveSwitch
 import com.shub39.grit.core.shared_ui.GritBottomSheet
 import com.shub39.grit.core.shared_ui.GritDatePicker
@@ -84,6 +84,7 @@ import com.shub39.grit.core.shared_ui.middleItemShape
 import com.shub39.grit.core.theme.GritTheme
 import com.shub39.grit.core.theme.flexFontEmphasis
 import com.shub39.grit.core.theme.flexFontRounded
+import com.shub39.grit.core.time
 import com.shub39.grit.core.toFormattedString
 import grit.shared.generated.resources.Res
 import grit.shared.generated.resources.add
@@ -111,6 +112,7 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -354,7 +356,7 @@ fun HabitUpsertSheetContent(
                                 .clip(endItemShape(topRadius = 0)),
                             headlineContent = {
                                 Text(
-                                    text = formatDateWithOrdinal(newHabit.time.date),
+                                    text = formatDateWithOrdinal(newHabit.time.date()),
                                     style =
                                         MaterialTheme.typography.titleLarge.copy(
                                             fontFamily = flexFontRounded()
@@ -467,7 +469,7 @@ fun HabitUpsertSheetContent(
                                 headlineContent = {
                                     Text(
                                         text =
-                                            newHabit.time.time.toFormattedString(is24Hr = is24Hr),
+                                            newHabit.time.time().toFormattedString(is24Hr = is24Hr),
                                         style =
                                             MaterialTheme.typography.titleLarge.copy(
                                                 fontFamily = flexFontRounded()
@@ -524,8 +526,8 @@ fun HabitUpsertSheetContent(
     if (timePickerDialog) {
         val timePickerState =
             rememberTimePickerState(
-                initialHour = newHabit.time.hour,
-                initialMinute = newHabit.time.minute,
+                initialHour = newHabit.time.time().hour,
+                initialMinute = newHabit.time.time().minute,
                 is24Hour = is24Hr,
             )
 
@@ -537,13 +539,13 @@ fun HabitUpsertSheetContent(
                     newHabit.copy(
                         time =
                             LocalDateTime(
-                                date = newHabit.time.date,
+                                date = newHabit.time.date(),
                                 time =
                                     LocalTime(
                                         minute = timePickerState.minute,
                                         hour = timePickerState.hour,
                                     ),
-                            )
+                            ).toInstant(TimeZone.currentSystemDefault())
                     )
                 )
                 timePickerDialog = false
@@ -572,8 +574,8 @@ fun HabitUpsertSheetContent(
                         time =
                             LocalDateTime(
                                 date = newDate,
-                                time = newHabit.time.time,
-                            )
+                                time = newHabit.time.time(),
+                            ).toInstant(TimeZone.currentSystemDefault())
                     )
                 )
                 datePickerDialog = false
@@ -592,7 +594,7 @@ private fun Preview() {
                     id = 1,
                     title = "New Habit",
                     description = "A new Habit",
-                    time = LocalDateTime.now(),
+                    time = Clock.System.now(),
                     days = DayOfWeek.entries.toSet(),
                     index = 1,
                     reminder = false,

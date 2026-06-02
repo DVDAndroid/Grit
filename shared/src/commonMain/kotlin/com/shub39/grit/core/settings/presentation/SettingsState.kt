@@ -31,6 +31,7 @@ data class SettingsState(
     val changelog: Changelog = emptyList(),
     val currentVersion: String? = null,
     val backupState: BackupState = BackupState(),
+    val syncState: SyncState = SyncState(),
 
     // datastore
     val theme: Theme = Theme(),
@@ -48,4 +49,13 @@ data class SettingsState(
 data class BackupState(
     val exportState: ExportState = ExportState.IDLE,
     val restoreState: RestoreState = RestoreState.IDLE,
+)
+
+@Stable
+@Immutable
+data class SyncState(
+    val url: String? = null,
+    val queueSize: Int = 0,
+    val busyImporting: Boolean = false,
+    val busyElaborating: Boolean = false,
 )

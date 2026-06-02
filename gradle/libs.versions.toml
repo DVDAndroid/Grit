@@ -31,6 +31,7 @@ kotlinx-serialization-json = "1.11.0"
 spotless = "8.5.1"
 filekit = "0.14.1"
 ktfmt = "0.61"
+ktor = "3.5.0"
 
 [libraries]
 # Android and compose stuff
@@ -80,6 +81,12 @@ calendar = { module = "com.kizitonwose.calendar:compose-multiplatform", version.
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+
+# ktor
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-gson = { group = "io.ktor", name = "ktor-serialization-gson", version.ref = "ktor" }
 
 [plugins]
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }

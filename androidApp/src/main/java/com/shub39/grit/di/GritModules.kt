@@ -23,6 +23,9 @@ import com.shub39.grit.habits.data.database.HabitDatabase
 import com.shub39.grit.habits.data.database.HabitDbFactory
 import com.shub39.grit.habits.data.database.HabitStatusDao
 import com.shub39.grit.habits.data.database.HabitsDao
+import com.shub39.grit.sync.database.SyncDao
+import com.shub39.grit.sync.database.SyncDatabase
+import com.shub39.grit.sync.database.SyncDbFactory
 import com.shub39.grit.tasks.data.database.CategoryDao
 import com.shub39.grit.tasks.data.database.TaskDatabase
 import com.shub39.grit.tasks.data.database.TaskDbFactory
@@ -45,6 +48,10 @@ class GritModules {
     @Single fun getHabitStatusDao(db: HabitDatabase): HabitStatusDao = db.habitStatusDao()
 
     @Single fun getCategoryDao(db: TaskDatabase): CategoryDao = db.categoryDao()
+
+    @Single fun getSyncDb(dbFactory: SyncDbFactory): SyncDatabase = dbFactory.create().build()
+
+    @Single fun getSyncDao(db: SyncDatabase): SyncDao = db.syncDao()
 
     @Single
     fun getDatastore(factory: DatastoreFactory): DataStore<Preferences> =

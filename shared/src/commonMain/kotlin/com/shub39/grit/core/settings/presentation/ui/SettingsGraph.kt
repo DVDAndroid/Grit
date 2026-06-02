@@ -39,6 +39,7 @@ import com.shub39.grit.core.settings.presentation.ui.section.BackupPage
 import com.shub39.grit.core.settings.presentation.ui.section.Changelog
 import com.shub39.grit.core.settings.presentation.ui.section.LookAndFeelPage
 import com.shub39.grit.core.settings.presentation.ui.section.RootPage
+import com.shub39.grit.core.settings.presentation.ui.section.SyncPage
 import com.shub39.grit.core.shared_ui.PageFill
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
@@ -51,6 +52,7 @@ private sealed interface SettingsRoutes : NavKey {
     @Serializable data object LookAndFeel : SettingsRoutes
 
     @Serializable data object Backup : SettingsRoutes
+    @Serializable data object Sync : SettingsRoutes
 
     @Serializable data object Changelog : SettingsRoutes
 
@@ -65,6 +67,7 @@ private val configuration = SavedStateConfiguration {
             subclass(SettingsRoutes.Backup::class, SettingsRoutes.Backup.serializer())
             subclass(SettingsRoutes.Changelog::class, SettingsRoutes.Changelog.serializer())
             subclass(SettingsRoutes.About::class, SettingsRoutes.About.serializer())
+            subclass(SettingsRoutes.Sync::class, SettingsRoutes.Sync.serializer())
         }
     }
 }
@@ -96,6 +99,7 @@ fun SettingsGraph(
                             onNavigateToBackup = { backStack.add(SettingsRoutes.Backup) },
                             onNavigateToPaywall = onNavigateToPaywall,
                             onNavigateToChangelog = { backStack.add(SettingsRoutes.Changelog) },
+                            onNavigateToSync = { backStack.add(SettingsRoutes.Sync) },
                             onNavigateToAppInfo = { backStack.add(SettingsRoutes.About) },
                         )
                     }
@@ -134,6 +138,16 @@ fun SettingsGraph(
                     entry<SettingsRoutes.About>(metadata = horizontalTransitionMetadata()) {
                         About(
                             versionName = state.currentVersion ?: "1.0.00-Demo",
+                            onNavigateBack = {
+                                if (backStack.size != 1) backStack.removeLastOrNull()
+                            },
+                        )
+                    }
+
+                    entry<SettingsRoutes.Sync>(metadata = horizontalTransitionMetadata()) {
+                        SyncPage(
+                            state = state,
+                            onAction = onAction,
                             onNavigateBack = {
                                 if (backStack.size != 1) backStack.removeLastOrNull()
                             },

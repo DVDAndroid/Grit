@@ -52,4 +52,8 @@ interface SettingsDatastore {
     fun getLastChangelogShown(): Flow<String>
 
     suspend fun updateLastChangelogShown(version: String)
+
+    fun getSyncServerUrl(): Flow<String?>
+
+    suspend fun updateSyncServerUrl(version: String?)
 }

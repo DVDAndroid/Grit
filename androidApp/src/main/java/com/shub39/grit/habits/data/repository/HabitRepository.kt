@@ -17,14 +17,17 @@
 package com.shub39.grit.habits.data.repository
 
 import com.shub39.grit.core.data.notification.GritNotificationManager
+import com.shub39.grit.core.date
 import com.shub39.grit.core.habits.domain.Habit
 import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitRanking
 import com.shub39.grit.core.habits.domain.HabitRepo
 import com.shub39.grit.core.habits.domain.HabitStatus
+import com.shub39.grit.core.habits.domain.HabitStatusMinimalKeys
 import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.domain.OverallAnalytics
+import com.shub39.grit.core.habits.domain.SyncQueueOperations
 import com.shub39.grit.core.habits.presentation.StatusHabitAction
 import com.shub39.grit.core.habits.presentation.StatusHabitAction.SaveNoteDialog
 import com.shub39.grit.core.habits.presentation.StatusHabitAction.SaveNumberDialog
@@ -37,8 +40,10 @@ import com.shub39.grit.habits.data.toHabit
 import com.shub39.grit.habits.data.toHabitEntity
 import com.shub39.grit.habits.data.toHabitStatus
 import com.shub39.grit.habits.data.toHabitStatusEntity
+import com.shub39.grit.sync.repository.SyncQueueRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -51,6 +56,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
+import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import kotlin.time.ExperimentalTime
 
@@ -59,6 +65,7 @@ import kotlin.time.ExperimentalTime
 class HabitRepository(
     private val habitDao: HabitsDao,
     private val habitStatusDao: HabitStatusDao,
+    private val syncRepo: SyncQueueRepository,
     private val datastore: SettingsDatastore,
     private val notificationManager: GritNotificationManager,
 ) : HabitRepo {
@@ -77,6 +84,10 @@ class HabitRepository(
 
     private val firstDayOfWeek = MutableStateFlow(DayOfWeek.MONDAY)
 
+    private val json = Json {
+        encodeDefaults = true
+    }
+
     init {
         CoroutineScope(Dispatchers.IO).launch {
             datastore.getStartOfTheWeekPref().onEach { firstDayOfWeek.update { it } }.launchIn(this)
@@ -84,11 +95,27 @@ class HabitRepository(
     }
 
     override suspend fun upsertHabit(habit: Habit) {
-        habitDao.upsertHabit(habit.toHabitEntity())
+        val habitEntity = habit.toHabitEntity()
+        var id = habitDao.upsertHabit(habitEntity)
+        if (id == -1L) id = habitEntity.id
+
+        coroutineScope {
+            launch {
+                syncRepo.queueJob(
+                    SyncQueueOperations.UPDATE_HABIT,
+                    Json.encodeToString(habitEntity.copy(id = id))
+                )
+            }
+        }
     }
 
     override suspend fun deleteHabit(habitId: Long) {
         habitDao.deleteHabit(habitId)
+        coroutineScope {
+            launch {
+                syncRepo.queueJob(SyncQueueOperations.DELETE_HABIT, habitId.toString())
+            }
+        }
     }
 
     override suspend fun getHabits(): List<Habit> {
@@ -126,7 +153,7 @@ class HabitRepository(
                                 habitStatuses = habitStatusesForHabit,
                             ),
                         weekDayFrequencyData = prepareWeekDayFrequencyData(dates = dates),
-                        startedDaysAgo = habit.time.date.daysUntil(LocalDate.now()).toLong(),
+                        startedDaysAgo = habit.time.date().daysUntil(LocalDate.now()).toLong(),
                         consistency = calculateConsistency(dates, habit.days),
                         numericAnalytics = numericAnalytics,
                     )
@@ -194,16 +221,43 @@ class HabitRepository(
         return habitStatusDao.getStatusByIdForHabit(habitId, date)?.toHabitStatus()
     }
 
-    override suspend fun getStatusByHabitAndDatePrevious(habitId: Long, date: LocalDate): HabitStatus? {
+    override suspend fun getStatusByHabitAndDatePrevious(
+        habitId: Long,
+        date: LocalDate
+    ): HabitStatus? {
         return habitStatusDao.getStatusByHabitAndDatePrevious(habitId, date)?.toHabitStatus()
     }
 
     override suspend fun upsertHabitStatus(habitStatus: HabitStatus) {
-        habitStatusDao.upsertHabitStatus(habitStatus.toHabitStatusEntity())
+        val habitStatusEntity = habitStatus.toHabitStatusEntity()
+        habitStatusDao.upsertHabitStatus(habitStatusEntity)
+
+        coroutineScope {
+            launch {
+                val id = habitStatusDao.getStatusForHabit(habitStatusEntity.habitId)
+                    .find { it.date == habitStatusEntity.date }?.id ?: return@launch
+                syncRepo.queueJob(
+                    SyncQueueOperations.UPDATE_HABIT_STATUS,
+                    json.encodeToString(habitStatusEntity.copy(id = id))
+                )
+            }
+        }
     }
 
     override suspend fun deleteHabitStatus(habitId: Long, date: LocalDate) {
         habitStatusDao.deleteStatus(habitId, date)
+        coroutineScope {
+            launch {
+                syncRepo.queueJob(
+                    SyncQueueOperations.DELETE_HABIT_STATUS, json.encodeToString(
+                        HabitStatusMinimalKeys(
+                            habitId = habitId,
+                            date = date,
+                        )
+                    )
+                )
+            }
+        }
     }
 
     override suspend fun getCompletedHabitsForDate(date: LocalDate): List<Habit> {

@@ -18,10 +18,9 @@ package com.shub39.grit.habits.data
 
 import com.shub39.grit.core.habits.domain.Habit
 import com.shub39.grit.core.habits.domain.HabitStatus
-import com.shub39.grit.core.now
 import com.shub39.grit.habits.data.database.HabitEntity
 import com.shub39.grit.habits.data.database.HabitStatusEntity
-import kotlinx.datetime.LocalDateTime
+import kotlin.time.Clock
 
 fun HabitEntity.toHabit(): Habit {
     return Habit(
@@ -38,7 +37,15 @@ fun HabitEntity.toHabit(): Habit {
 }
 
 fun HabitStatusEntity.toHabitStatus(): HabitStatus {
-    return HabitStatus(id = id, habitId = habitId, date = date, ok = ok, notes = notes, numberValue = numberValue, updatedAt = updatedAt)
+    return HabitStatus(
+        id = id,
+        habitId = habitId,
+        date = date,
+        ok = ok,
+        notes = notes,
+        numberValue = numberValue,
+        updatedAt = updatedAt
+    )
 }
 
 fun Habit.toHabitEntity(): HabitEntity {
@@ -51,10 +58,18 @@ fun Habit.toHabitEntity(): HabitEntity {
         days = days,
         reminder = reminder,
         type = type,
-        updatedAt = LocalDateTime.now(),
+        updatedAt = Clock.System.now(),
     )
 }
 
 fun HabitStatus.toHabitStatusEntity(): HabitStatusEntity {
-    return HabitStatusEntity(id = id, habitId = habitId, date = date, ok = ok, notes = notes, numberValue = numberValue, updatedAt = LocalDateTime.now())
+    return HabitStatusEntity(
+        id = id,
+        habitId = habitId,
+        date = date,
+        ok = ok,
+        notes = notes,
+        numberValue = numberValue,
+        updatedAt = Clock.System.now(),
+    )
 }

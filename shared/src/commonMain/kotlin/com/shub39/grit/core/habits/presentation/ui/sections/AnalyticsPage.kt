@@ -65,6 +65,7 @@ import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.minusMonths
 import com.kizitonwose.calendar.core.now
 import com.shub39.grit.core.LocalWindowSizeClass
+import com.shub39.grit.core.date
 import com.shub39.grit.core.habits.domain.HabitType
 import com.shub39.grit.core.habits.presentation.HabitState
 import com.shub39.grit.core.habits.presentation.HabitsAction
@@ -205,7 +206,7 @@ fun AnalyticsPage(
             item {
                 StartStats(
                     consistency = currentHabit.consistency,
-                    startDate = currentHabit.habit.time.date,
+                    startDate = currentHabit.habit.time.date(),
                     bestStreak = currentHabit.bestStreak,
                     currentStreak = currentHabit.currentStreak,
                 )

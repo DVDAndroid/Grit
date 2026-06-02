@@ -17,10 +17,11 @@
 package com.shub39.grit.core.habits.domain
 
 import androidx.compose.runtime.Stable
-import com.shub39.grit.core.now
+import com.shub39.grit.core.InstantSerializer
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Stable
 @Serializable
@@ -31,7 +32,8 @@ data class HabitStatus(
     val ok: HabitCompletion,
     val notes: String?,
     val numberValue: Float?,
-    private val updatedAt: LocalDateTime = LocalDateTime.now(),
+    @Serializable(with = InstantSerializer::class)
+    val updatedAt: Instant = Clock.System.now(),
 ) {
 
     fun isCompleted() = ok == HabitCompletion.Completed

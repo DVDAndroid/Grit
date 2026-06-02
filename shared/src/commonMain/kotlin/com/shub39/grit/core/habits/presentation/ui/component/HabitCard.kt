@@ -57,11 +57,13 @@ import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 import com.kizitonwose.calendar.core.minusDays
 import com.kizitonwose.calendar.core.plusDays
+import com.shub39.grit.core.date
 import com.shub39.grit.core.habits.domain.HabitWithAnalytics
 import com.shub39.grit.core.habits.presentation.HabitsAction
 import com.shub39.grit.core.habits.presentation.habitAction
 import com.shub39.grit.core.localized
 import com.shub39.grit.core.now
+import com.shub39.grit.core.time
 import com.shub39.grit.core.toFormattedString
 import grit.shared.generated.resources.Res
 import grit.shared.generated.resources.analytics
@@ -125,7 +127,7 @@ fun HabitCard(
 
     val weekState =
         rememberWeekCalendarState(
-            startDate = habitWithAnalytics.habit.time.date.minus(1, DateTimeUnit.YEAR),
+            startDate = habitWithAnalytics.habit.time.date().minus(1, DateTimeUnit.YEAR),
             endDate = today,
             firstVisibleWeekDate = today,
             firstDayOfWeek = startingDay,
@@ -184,7 +186,7 @@ fun HabitCard(
             supportingContent = {
                 if (habitWithAnalytics.habit.reminder) {
                     Text(
-                        text = habitWithAnalytics.habit.time.time.toFormattedString(is24Hr),
+                        text = habitWithAnalytics.habit.time.time().toFormattedString(is24Hr),
                         style = MaterialTheme.typography.labelMedium,
                     )
                 }

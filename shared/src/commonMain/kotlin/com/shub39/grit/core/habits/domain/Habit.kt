@@ -17,10 +17,11 @@
 package com.shub39.grit.core.habits.domain
 
 import androidx.compose.runtime.Stable
-import com.shub39.grit.core.now
+import com.shub39.grit.core.InstantSerializer
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Stable
 @Serializable
@@ -28,10 +29,12 @@ data class Habit(
     val id: Long = 0,
     val title: String,
     val description: String,
-    val time: LocalDateTime,
+    @Serializable(with = InstantSerializer::class)
+    val time: Instant,
     val days: Set<DayOfWeek>,
     val index: Int,
     val reminder: Boolean,
     val type: HabitType,
-    private val updatedAt: LocalDateTime = LocalDateTime.now(),
+    @Serializable(with = InstantSerializer::class)
+    val updatedAt: Instant = Clock.System.now(),
 )
