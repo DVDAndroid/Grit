@@ -19,6 +19,7 @@ package com.shub39.grit.core.settings.presentation
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.shub39.grit.core.components.Changelog
+import com.shub39.grit.core.habits.domain.SyncQueueJob
 import com.shub39.grit.core.settings.domain.Sections
 import com.shub39.grit.core.settings.domain.backup.ExportState
 import com.shub39.grit.core.settings.domain.backup.RestoreState
@@ -55,7 +56,7 @@ data class BackupState(
 @Immutable
 data class SyncState(
     val url: String? = null,
-    val queueSize: Int = 0,
+    val queue: List<SyncQueueJob> = emptyList(),
     val busyImporting: Boolean = false,
     val busyElaborating: Boolean = false,
 )

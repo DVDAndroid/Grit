@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import com.shub39.grit.core.habits.domain.SyncQueueJob
 import com.shub39.grit.core.settings.presentation.SettingsAction
 import com.shub39.grit.core.settings.presentation.SettingsState
 import com.shub39.grit.core.shared_ui.detachedItemShape
@@ -53,6 +55,7 @@ import grit.shared.generated.resources.sync
 import grit.shared.generated.resources.sync_server_url
 import grit.shared.generated.resources.sync_server_url_none
 import grit.shared.generated.resources.tray_full
+import grit.shared.generated.resources.visibility
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -65,6 +68,7 @@ fun SyncPage(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var syncServerDialog by remember { mutableStateOf(false) }
+    var queueListDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier =
@@ -170,18 +174,19 @@ fun SyncPage(
                                 Text(
                                     text = stringResource(
                                         Res.string.queue_size,
-                                        state.syncState.queueSize
+                                        state.syncState.queue.size
                                     )
                                 )
                             },
                         )
 
-                        if (state.syncState.queueSize > 0) {
+                        if (state.syncState.queue.size > 0) {
                             Row(
                                 modifier =
                                     Modifier.fillParentMaxWidth()
                                         .background(listItemColors().containerColor)
-                                        .padding(start = 52.dp, end = 16.dp, bottom = 8.dp)
+                                        .padding(start = 52.dp, end = 16.dp, bottom = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
                                 Button(
                                     onClick = { onAction(SettingsAction.ElaborateQueue) },
@@ -197,6 +202,18 @@ fun SyncPage(
                                         )
                                     }
                                 }
+                                Button(
+                                    onClick = {
+                                        queueListDialog = true
+                                    },
+                                    enabled = !(state.syncState.busyImporting || state.syncState.busyElaborating),
+                                    modifier = Modifier.weight(1f),
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.visibility),
+                                        contentDescription = null,
+                                    )
+                                }
                             }
                         }
                     }
@@ -210,6 +227,13 @@ fun SyncPage(
             state,
             onAction,
             onDismissRequest = { syncServerDialog = false },
+        )
+    }
+
+    if (queueListDialog) {
+        QueueListDialog(
+            state.syncState.queue,
+            onDismissRequest = { queueListDialog = false },
         )
     }
 }
@@ -259,4 +283,37 @@ fun SyncServerUrlDialog(
         }
     )
 
+}
+
+@Composable
+fun QueueListDialog(
+    queueList: List<SyncQueueJob>,
+    onDismissRequest: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest,
+        title = { Text("Queue") },
+        text = {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(queueList) {
+                    Text(buildString {
+                        append(it.id)
+                        append(" ")
+                        append(it.operation.name)
+                        append(": ")
+                    })
+                    Text(it.payload)
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                onDismissRequest()
+            }) {
+                Text("Close")
+            }
+        },
+    )
 }

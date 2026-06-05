@@ -67,7 +67,7 @@ class SettingsViewModel(
                 observeJob()
                 getChangeLogs()
                 getBiometricStatus()
-                getSyncQueueSize()
+                getSyncQueue()
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SettingsState())
 
@@ -155,7 +155,7 @@ class SettingsViewModel(
                         it.copy(syncState = it.syncState.copy(busyElaborating = true))
                     }
                     syncRepo.elaborateQueue()
-                    getSyncQueueSize()
+                    getSyncQueue()
                     _state.update {
                         it.copy(syncState = it.syncState.copy(busyElaborating = false))
                     }
@@ -179,9 +179,9 @@ class SettingsViewModel(
         }
     }
 
-    private suspend fun getSyncQueueSize() {
+    private suspend fun getSyncQueue() {
         _state.update {
-            it.copy(syncState = it.syncState.copy(queueSize = syncRepo.getJobs().size))
+            it.copy(syncState = it.syncState.copy(queue = syncRepo.getJobs()))
         }
     }
 
