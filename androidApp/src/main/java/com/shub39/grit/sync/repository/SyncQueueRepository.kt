@@ -1,9 +1,5 @@
 package com.shub39.grit.sync.repository
 
-import com.shub39.grit.core.data.HabitCompletionAdapter
-import com.shub39.grit.core.data.InstantTypeAdapter
-import com.shub39.grit.core.data.LocalDateTypeAdapter
-import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitStatusMinimalKeys
 import com.shub39.grit.core.habits.domain.SyncQueueJob
 import com.shub39.grit.core.habits.domain.SyncQueueOperations
@@ -26,12 +22,10 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import io.ktor.serialization.gson.gson
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
-import kotlin.time.Instant
 
 @Single(binds = [SyncQueueRepo::class])
 class SyncQueueRepository(
@@ -43,11 +37,7 @@ class SyncQueueRepository(
 
     private val client = HttpClient {
         install(ContentNegotiation) {
-            gson {
-                registerTypeAdapter(Instant::class.java, InstantTypeAdapter)
-                registerTypeAdapter(LocalDate::class.java, LocalDateTypeAdapter)
-                registerTypeAdapter(HabitCompletion::class.java, HabitCompletionAdapter)
-            }
+            json()
         }
         expectSuccess = false
     }

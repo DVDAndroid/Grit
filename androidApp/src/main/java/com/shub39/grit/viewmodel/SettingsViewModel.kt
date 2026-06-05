@@ -166,6 +166,7 @@ class SettingsViewModel(
                         it.copy(syncState = it.syncState.copy(busyImporting = true))
                     }
                     syncRepo.importAll()
+                    getSyncQueue()
                     _state.update {
                         it.copy(syncState = it.syncState.copy(busyImporting = false))
                     }

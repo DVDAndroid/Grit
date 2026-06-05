@@ -17,10 +17,6 @@
 package com.shub39.grit.core.data
 
 import androidx.room3.TypeConverter
-import com.google.gson.TypeAdapter
-import com.google.gson.stream.JsonReader
-import com.google.gson.stream.JsonToken
-import com.google.gson.stream.JsonWriter
 import com.shub39.grit.core.habits.domain.HabitCompletion
 import com.shub39.grit.core.habits.domain.HabitType
 import kotlinx.datetime.DayOfWeek
@@ -30,9 +26,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -100,79 +93,4 @@ object Converters {
 
     @TypeConverter
     fun toHabitType(value: String): HabitType = HabitType.byValue(value)
-}
-
-object InstantTypeAdapter : TypeAdapter<Instant>() {
-
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
-
-    override fun write(out: JsonWriter, value: Instant?) {
-        if (value == null) {
-            out.nullValue()
-            return
-        }
-
-        val ldt = java.time.LocalDateTime.ofInstant(
-            java.time.Instant.ofEpochMilli(value.toEpochMilliseconds()),
-            ZoneOffset.UTC
-        )
-
-        out.value(formatter.format(ldt))
-    }
-
-    override fun read(reader: JsonReader): Instant? {
-        if (reader.peek() == JsonToken.NULL) {
-            reader.nextNull()
-            return null
-        }
-
-        val text = reader.nextString()
-        val ldt = java.time.LocalDateTime.parse(text, formatter)
-
-        val epochMillis = ldt.toInstant(ZoneOffset.UTC).toEpochMilli()
-
-        return Instant.DISTANT_PAST + epochMillis.milliseconds
-    }
-}
-
-
-object LocalDateTypeAdapter : TypeAdapter<LocalDate>() {
-
-    override fun write(out: JsonWriter, value: LocalDate?) {
-        if (value == null) {
-            out.nullValue()
-        } else {
-            out.value(value.toString()) // yyyy-MM-dd
-        }
-    }
-
-    override fun read(reader: JsonReader): LocalDate? {
-        if (reader.peek() == JsonToken.NULL) {
-            reader.nextNull()
-            return null
-        }
-
-        return LocalDate.parse(reader.nextString())
-    }
-}
-
-object HabitCompletionAdapter : TypeAdapter<HabitCompletion>() {
-
-    override fun write(out: JsonWriter, value: HabitCompletion?) {
-        if (value == null) {
-            out.nullValue()
-        } else {
-            out.value(value.ok)
-        }
-    }
-
-    override fun read(reader: JsonReader): HabitCompletion? {
-        if (reader.peek() == JsonToken.NULL) {
-            reader.nextNull()
-            return null
-        }
-
-        val num = reader.nextInt()
-        return HabitCompletion.byValue(num)
-    }
 }
